@@ -35,6 +35,14 @@ export default function Layout({ children }) {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
+    const scrollToSection = (e, id) => {
+        // Only prevent default and scroll if we are on the home page with these sections
+        if (window.location.pathname === '/' || window.location.pathname === '') {
+            e.preventDefault();
+            document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+        }
+    };
+
     return (
         <div className="min-h-screen bg-transparent text-[#1b1b18] dark:text-[#EDEDEC] font-sans selection:bg-[var(--color-sky-primary)] selection:text-white pb-12 transition-colors duration-300 relative">
             {/* Global Background Image */}
@@ -49,10 +57,10 @@ export default function Layout({ children }) {
                     </Link>
 
                     <div className="hidden md:flex items-center space-x-8 text-sm font-medium">
-                        <Link href="#about" className="text-gray-600 dark:text-gray-300 hover:text-[var(--color-sky-primary)] dark:hover:text-[var(--color-sky-primary)] transition-colors">About</Link>
-                        <Link href="#skills" className="text-gray-600 dark:text-gray-300 hover:text-[var(--color-sky-primary)] dark:hover:text-[var(--color-sky-primary)] transition-colors">Skills</Link>
-                        <Link href="#projects" className="text-gray-600 dark:text-gray-300 hover:text-[var(--color-sky-primary)] dark:hover:text-[var(--color-sky-primary)] transition-colors">Projects</Link>
-                        <Link href="#contact" className="text-gray-600 dark:text-gray-300 hover:text-[var(--color-sky-primary)] dark:hover:text-[var(--color-sky-primary)] transition-colors">Contact</Link>
+                        <Link href="#about" onClick={(e) => scrollToSection(e, 'about')} className="text-gray-600 dark:text-gray-300 hover:text-[var(--color-sky-primary)] dark:hover:text-[var(--color-sky-primary)] transition-colors">About</Link>
+                        <Link href="#skills" onClick={(e) => scrollToSection(e, 'skills')} className="text-gray-600 dark:text-gray-300 hover:text-[var(--color-sky-primary)] dark:hover:text-[var(--color-sky-primary)] transition-colors">Skills</Link>
+                        <Link href="#projects" onClick={(e) => scrollToSection(e, 'projects')} className="text-gray-600 dark:text-gray-300 hover:text-[var(--color-sky-primary)] dark:hover:text-[var(--color-sky-primary)] transition-colors">Projects</Link>
+                        <Link href="#contact" onClick={(e) => scrollToSection(e, 'contact')} className="text-gray-600 dark:text-gray-300 hover:text-[var(--color-sky-primary)] dark:hover:text-[var(--color-sky-primary)] transition-colors">Contact</Link>
 
                         {/* Dark Mode Toggle */}
                         <button onClick={toggleDarkMode} className="p-2 text-gray-400 hover:text-white rounded-full transition-colors ml-4 focus:outline-none focus:ring-2 focus:ring-[var(--color-sky-light)]">
