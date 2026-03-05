@@ -13,8 +13,17 @@ createInertiaApp({
     setup({ el, App, props }) {
         const root = createRoot(el);
         root.render(<App {...props} />);
+
+        // Force scroll jump
+        if ('scrollRestoration' in window.history) {
+            window.history.scrollRestoration = 'manual';
+        }
     },
     progress: {
         color: '#7EC8E3',
     },
+});
+
+window.addEventListener('beforeunload', () => {
+    window.scrollTo(0, 0);
 });

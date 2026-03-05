@@ -10,10 +10,19 @@ export default function Layout({ children }) {
 
     useEffect(() => {
         // Force scroll to top on page load/refresh
-        if ('scrollRestoration' in history) {
-            history.scrollRestoration = 'manual';
+        if ('scrollRestoration' in window.history) {
+            window.history.scrollRestoration = 'manual';
         }
-        window.scrollTo(0, 0);
+
+        // Remove hash from the URL initially so the browser doesn't jump to a section
+        if (window.location.hash) {
+            window.history.replaceState(null, '', window.location.pathname + window.location.search);
+        }
+
+        const forceTop = () => window.scrollTo(0, 0);
+        forceTop();
+        setTimeout(forceTop, 0);
+        setTimeout(forceTop, 100);
 
         const handleScroll = () => {
             setShowScrollTop(window.scrollY > 300);
@@ -27,9 +36,11 @@ export default function Layout({ children }) {
     };
 
     return (
-        <div className="min-h-screen bg-[#FDFDFC] dark:bg-[#0a0a0a] text-[#1b1b18] dark:text-[#EDEDEC] font-sans selection:bg-[var(--color-sky-primary)] selection:text-white pb-12 transition-colors duration-300 relative">
+        <div className="min-h-screen bg-transparent text-[#1b1b18] dark:text-[#EDEDEC] font-sans selection:bg-[var(--color-sky-primary)] selection:text-white pb-12 transition-colors duration-300 relative">
             {/* Global Background Image */}
-            <div className="fixed inset-0 -z-10 bg-[url('/images/backgrounds/download.png')] bg-cover bg-center bg-fixed opacity-[0.04] dark:opacity-[0.06] pointer-events-none"></div>
+            <div className="fixed inset-0 -z-20 bg-[url('/images/backgrounds/download.png')] bg-cover bg-center bg-no-repeat pointer-events-none"></div>
+            {/* Dark mode overlay */}
+            <div className="fixed inset-0 -z-10 hidden dark:block bg-[#0a0a0a]/90 pointer-events-none transition-colors duration-300"></div>
             {/* Sticky Navbar */}
             <nav className="sticky top-0 z-40 bg-[#FDFDFC]/80 dark:bg-[#0a0a0a]/80 backdrop-blur-md border-b border-gray-100 dark:border-[#3E3E3A]">
                 <div className="w-full max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
@@ -38,10 +49,10 @@ export default function Layout({ children }) {
                     </Link>
 
                     <div className="hidden md:flex items-center space-x-8 text-sm font-medium">
-                        <a href="#about" className="text-gray-600 dark:text-gray-300 hover:text-[var(--color-sky-primary)] dark:hover:text-[var(--color-sky-primary)] transition-colors">About</a>
-                        <a href="#skills" className="text-gray-600 dark:text-gray-300 hover:text-[var(--color-sky-primary)] dark:hover:text-[var(--color-sky-primary)] transition-colors">Skills</a>
-                        <a href="#projects" className="text-gray-600 dark:text-gray-300 hover:text-[var(--color-sky-primary)] dark:hover:text-[var(--color-sky-primary)] transition-colors">Projects</a>
-                        <a href="#contact" className="text-gray-600 dark:text-gray-300 hover:text-[var(--color-sky-primary)] dark:hover:text-[var(--color-sky-primary)] transition-colors">Contact</a>
+                        <Link href="#about" className="text-gray-600 dark:text-gray-300 hover:text-[var(--color-sky-primary)] dark:hover:text-[var(--color-sky-primary)] transition-colors">About</Link>
+                        <Link href="#skills" className="text-gray-600 dark:text-gray-300 hover:text-[var(--color-sky-primary)] dark:hover:text-[var(--color-sky-primary)] transition-colors">Skills</Link>
+                        <Link href="#projects" className="text-gray-600 dark:text-gray-300 hover:text-[var(--color-sky-primary)] dark:hover:text-[var(--color-sky-primary)] transition-colors">Projects</Link>
+                        <Link href="#contact" className="text-gray-600 dark:text-gray-300 hover:text-[var(--color-sky-primary)] dark:hover:text-[var(--color-sky-primary)] transition-colors">Contact</Link>
 
                         {/* Dark Mode Toggle */}
                         <button onClick={toggleDarkMode} className="p-2 text-gray-400 hover:text-white rounded-full transition-colors ml-4 focus:outline-none focus:ring-2 focus:ring-[var(--color-sky-light)]">

@@ -20,12 +20,13 @@ export default function Welcome() {
     const projects = [
         {
             title: 'EduGrade: Digital Gradebook',
-            desc: 'A comprehensive digital gradebook system for Naawan Central School. Features include student grade management, teacher dashboards, report generation, and parent access portals.',
+            desc: 'A comprehensive digital gradebook system for Naawan. The tools that we used are Laravel, Vue and Inertia, then PostgreSQL for the database and Figma for UI/UX designing.',
             tags: [
                 { name: 'Laravel', logo: '/images/logos/laravel.png' },
-                { name: 'React', logo: '/images/logos/react.png' },
+                { name: 'Vue', logo: '/images/logos/vuee.png' },
                 { name: 'Inertia.js', logo: '/images/logos/inertia.png' },
-                { name: 'MySQL', logo: '/images/logos/MySQL.png' }
+                { name: 'PostgreSQL', logo: '/images/logos/postgre.jpg' },
+                { name: 'Figma', logo: '/images/logos/figma.png' }
             ],
             status: 'Finished',
             progress: 100
@@ -141,11 +142,7 @@ export default function Welcome() {
                 `}
             </style>
             <div className="relative w-full px-0 pt-40 pb-24 flex flex-col justify-center min-h-[90vh] text-left overflow-hidden">
-                {/* Hero Background Image */}
-                <div className="absolute inset-x-0 top-0 h-full -z-10">
-                    <div className="absolute inset-0 bg-[url('/images/backgrounds/download.png')] bg-cover bg-center bg-no-repeat opacity-40 dark:opacity-20"></div>
-                    <div className="absolute inset-0 bg-gradient-to-b from-[#FDFDFC]/10 via-[#FDFDFC]/60 to-[#FDFDFC] dark:from-[#0a0a0a]/10 dark:via-[#0a0a0a]/60 dark:to-[#0a0a0a]"></div>
-                </div>
+                {/* Removed Hero Background Gradient to allow the global background image to stand out */}
 
                 <div className="animate-fade-in-up flex flex-col items-start w-full max-w-6xl mx-auto px-6 z-10">
                     <h1 className="text-5xl md:text-7xl lg:text-[80px] font-bold mb-2 tracking-tight text-gray-900 dark:text-white leading-[1.1]">
@@ -161,19 +158,19 @@ export default function Welcome() {
                     </p>
 
                     <div className="flex flex-row gap-4 items-center">
-                        <a href="#projects" className="bg-[var(--color-sky-primary)] hover:bg-[var(--color-sky-hover)] text-white font-semibold py-3 px-8 rounded-lg transition-all duration-300 shadow-md flex items-center justify-center">
+                        <Link href="#projects" className="bg-[var(--color-sky-primary)] hover:bg-[var(--color-sky-hover)] text-white font-semibold py-3 px-8 rounded-lg transition-all duration-300 shadow-md flex items-center justify-center">
                             Hire Me
-                        </a>
-                        <a href="#contact" className="bg-white border border-gray-200 hover:border-gray-400 hover:text-gray-500 text-[var(--color-sky-dark)] font-semibold py-3 px-8 rounded-2xl transition-all duration-300 flex items-center justify-center shadow-sm dark:bg-transparent dark:border-gray-700 dark:text-[var(--color-sky-light)] dark:hover:border-gray-400 dark:hover:text-gray-400">
+                        </Link>
+                        <Link href="#contact" className="bg-white border border-gray-200 hover:border-gray-400 hover:text-gray-500 text-[var(--color-sky-dark)] font-semibold py-3 px-8 rounded-2xl transition-all duration-300 flex items-center justify-center shadow-md hover:shadow-lg hover:shadow-blue-300 dark:bg-transparent dark:border-gray-700 dark:text-[var(--color-sky-light)] dark:hover:border-gray-400 dark:hover:text-gray-400">
                             Let's Talk
-                        </a>
+                        </Link>
                     </div>
 
-                    <a href="#about" className="mt-24 text-gray-400 dark:text-gray-600 hover:text-[var(--color-sky-primary)] dark:hover:text-[var(--color-sky-primary)] transition-colors duration-300 animate-bounce">
+                    <Link href="#about" className="mt-24 text-gray-400 dark:text-gray-600 hover:text-[var(--color-sky-primary)] dark:hover:text-[var(--color-sky-primary)] transition-colors duration-300 animate-bounce">
                         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
                         </svg>
-                    </a>
+                    </Link>
                 </div>
             </div>
 
