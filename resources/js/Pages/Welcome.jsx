@@ -1,126 +1,129 @@
-import React, { useState, useEffect } from 'react';
-import { Head, Link } from '@inertiajs/react';
-import Layout from '../Layouts/Layout';
-import useScrollReveal from '../Hooks/useScrollReveal';
+import React, { useState, useEffect } from "react";
+import { Head, Link } from "@inertiajs/react";
+import {
+    Github,
+    Linkedin,
+    Facebook,
+    Instagram,
+    ChevronDown,
+    Lightbulb,
+    Rocket,
+    Heart,
+    BookOpen,
+    User,
+    Download,
+    MapPin,
+    ArrowRight,
+    Mail,
+    Phone,
+    Send,
+} from "lucide-react";
+import Layout from "../Layouts/Layout";
+
+const Typewriter = ({
+    text,
+    typingSpeed = 100,
+    erasingSpeed = 50,
+    pauseTime = 2000,
+}) => {
+    const [currentText, setCurrentText] = useState("");
+    const [isDeleting, setIsDeleting] = useState(false);
+
+    useEffect(() => {
+        let timeout;
+
+        if (!isDeleting && currentText.length < text.length) {
+            // Typing
+            timeout = setTimeout(() => {
+                setCurrentText(text.substring(0, currentText.length + 1));
+            }, typingSpeed);
+        } else if (isDeleting && currentText.length > 0) {
+            // Erasing
+            timeout = setTimeout(() => {
+                setCurrentText(text.substring(0, currentText.length - 1));
+            }, erasingSpeed);
+        } else if (!isDeleting && currentText.length === text.length) {
+            // Pause before erasing
+            timeout = setTimeout(() => setIsDeleting(true), pauseTime);
+        } else if (isDeleting && currentText.length === 0) {
+            // Pause before typing again
+            timeout = setTimeout(() => setIsDeleting(false), 500);
+        }
+
+        return () => clearTimeout(timeout);
+    }, [currentText, isDeleting, text, typingSpeed, erasingSpeed, pauseTime]);
+
+    return (
+        <span className="border-r-[3px] border-sky-400 pr-1 animate-pulse">
+            {currentText}
+        </span>
+    );
+};
+
+import useScrollReveal from "../Hooks/useScrollReveal";
+import useSkills from "../Hooks/useSkills";
+import ContactForm from "../Components/ContactForm";
+import SkillCard from "../Components/SkillCard";
+import CategoryToggle from "../Components/CategoryToggle";
 
 export default function Welcome() {
     const [aboutRef, aboutIsVisible] = useScrollReveal();
+    const [educationRef, educationIsVisible] = useScrollReveal();
     const [skillsRef, skillsIsVisible] = useScrollReveal();
     const [projectsRef, projectsIsVisible] = useScrollReveal();
     const [contactRef, contactIsVisible] = useScrollReveal();
 
-    const [currentSlide, setCurrentSlide] = useState(0);
-    const [isHovered, setIsHovered] = useState(false);
+    const [activeProject, setActiveProject] = useState(0);
+    const { activeCategory, setActiveCategory, categories, getCurrentSkills } =
+        useSkills();
 
     const scrollToSection = (e, id) => {
         e.preventDefault();
-        document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+        document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
     };
-
-    // Drag functionality state
-    const [touchStart, setTouchStart] = useState(null);
-    const [touchEnd, setTouchEnd] = useState(null);
-    const [isDragging, setIsDragging] = useState(false);
 
     const projects = [
         {
-            title: 'EduGrade: Digital Gradebook',
-            desc: 'A comprehensive digital gradebook system for Naawan. The tools that we used are Laravel, Vue and Inertia, then PostgreSQL for the database and Figma for UI/UX designing.',
+            title: "EduGrade: Digital Gradebook",
+            desc: "A comprehensive digital gradebook system for Naawan Central School. The tools that we used are Laravel, Vue and Inertia, then PostgreSQL for the database and Figma for UI/UX designing.",
+            image: "https://images.unsplash.com/photo-1509062522246-3755977927d7?q=80&w=2000",
             tags: [
-                { name: 'Laravel', logo: '/images/logos/laravel.png' },
-                { name: 'Vue', logo: '/images/logos/vuee.png' },
-                { name: 'Inertia.js', logo: '/images/logos/inertia.png' },
-                { name: 'PostgreSQL', logo: '/images/logos/postgre.jpg' },
-                { name: 'Figma', logo: '/images/logos/figma.png' }
+                { name: "Laravel", logo: "/images/logos/laravel.png" },
+                { name: "Vue", logo: "/images/logos/vuee.png" },
+                { name: "Inertia", logo: "/images/logos/inertia.png" },
+                { name: "PostgreSQL", logo: "/images/logos/postgre.png" },
+                { name: "Figma", logo: "/images/logos/figma.png" },
             ],
-            status: 'Finished',
-            progress: 100
+            status: "Finished",
+            progress: 100,
         },
         {
-            title: 'Portfolio Website',
-            desc: 'A modern, minimalist personal portfolio website showcasing skills, projects, and contact information with dark mode support.',
+            title: "Portfolio Website",
+            desc: "A modern, minimalist personal portfolio website showcasing skills, projects, and contact information with dark mode support.",
+            image: "https://images.unsplash.com/photo-1467232004584-a241de8bcf5d?q=80&w=2000",
             tags: [
-                { name: 'Laravel', logo: '/images/logos/laravel.png' },
-                { name: 'React', logo: '/images/logos/react.png' },
-                { name: 'Inertia.js', logo: '/images/logos/inertia.png' },
-                { name: 'TailwindCSS', logo: '/images/logos/tailwind.png' }
+                { name: "Laravel", logo: "/images/logos/laravel.png" },
+                { name: "React", logo: "/images/logos/react.png" },
+                { name: "Inertia", logo: "/images/logos/inertia.png" },
+                { name: "TailwindCSS", logo: "/images/logos/tailwind.png" },
             ],
-            status: 'Finished',
-            progress: 100
+            status: "Finished",
+            progress: 100,
         },
         {
-            title: 'E-Commerce Platform',
-            desc: 'A full-featured online store with payment integration, inventory management, and admin dashboard.',
+            title: "E-Commerce Platform",
+            desc: "A full-featured online store with payment integration, inventory management, and admin dashboard.",
+            image: "https://images.unsplash.com/photo-1472851294608-062f824d29cc?q=80&w=2000",
             tags: [
-                { name: 'Laravel', logo: '/images/logos/laravel.png' },
-                { name: 'React', logo: '/images/logos/react.png' },
-                { name: 'TailwindCSS', logo: '/images/logos/tailwind.png' },
-                { name: 'PostgreSQL', logo: '/images/logos/postgre.jpg' }
+                { name: "Laravel", logo: "/images/logos/laravel.png" },
+                { name: "React", logo: "/images/logos/react.png" },
+                { name: "TailwindCSS", logo: "/images/logos/tailwind.png" },
+                { name: "PostgreSQL", logo: "/images/logos/postgre.png" },
             ],
-            status: 'In Progress',
-            progress: 65
-        },
-        {
-            title: 'Task Management App',
-            desc: 'A collaborative project management tool with real-time updates, kanban boards, and team features.',
-            tags: [
-                { name: 'Vue', logo: '/images/logos/vuee.png' },
-                { name: 'Django', logo: '/images/logos/django.png' },
-                { name: 'TailwindCSS', logo: '/images/logos/tailwind.png' },
-                { name: 'PostgreSQL', logo: '/images/logos/postgre.jpg' }
-            ],
-            status: 'Starting',
-            progress: 15
+            status: "In Progress",
+            progress: 65,
         },
     ];
-
-    const nextSlide = () => {
-        setCurrentSlide((prev) => (prev + 1) % projects.length);
-    };
-
-    const prevSlide = () => {
-        setCurrentSlide((prev) => (prev - 1 + projects.length) % projects.length);
-    };
-
-    // Auto-advance carousel
-    useEffect(() => {
-        let timer;
-        if (!isHovered && !isDragging) {
-            timer = setInterval(nextSlide, 5000);
-        }
-        return () => {
-            if (timer) clearInterval(timer);
-        };
-    }, [isHovered, isDragging]);
-
-    // Swipe handlers
-    const minSwipeDistance = 50;
-
-    const onTouchStart = (e) => {
-        setTouchEnd(null);
-        setTouchStart(e.targetTouches ? e.targetTouches[0].clientX : e.clientX);
-        setIsDragging(true);
-    };
-
-    const onTouchMove = (e) => {
-        if (!isDragging) return;
-        setTouchEnd(e.targetTouches ? e.targetTouches[0].clientX : e.clientX);
-    };
-
-    const onTouchEnd = () => {
-        setIsDragging(false);
-        if (!touchStart || !touchEnd) return;
-
-        const distance = touchStart - touchEnd;
-        const isLeftSwipe = distance > minSwipeDistance;
-        const isRightSwipe = distance < -minSwipeDistance;
-
-        if (isLeftSwipe) {
-            nextSlide();
-        } else if (isRightSwipe) {
-            prevSlide();
-        }
-    };
 
     return (
         <Layout>
@@ -132,8 +135,26 @@ export default function Welcome() {
                         from { opacity: 0; transform: translateY(20px); }
                         to { opacity: 1; transform: translateY(0); }
                     }
+                    @keyframes fadeInUp {
+                        from { opacity: 0; transform: translateY(30px); }
+                        to { opacity: 1; transform: translateY(0); }
+                    }
+                    @keyframes slideInLeft {
+                        from { opacity: 0; transform: translateX(-80px) rotate(-1deg); }
+                        to { opacity: 1; transform: translateX(0) rotate(0deg); }
+                    }
+                    @keyframes slideInRight {
+                        from { opacity: 0; transform: translateX(80px) rotate(1deg); }
+                        to { opacity: 1; transform: translateX(0) rotate(0deg); }
+                    }
                     .animate-fade-in-up {
                         animation: fade-in-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+                    }
+                    .animate-slide-in-left {
+                        animation: slideInLeft 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+                    }
+                    .animate-slide-in-right {
+                        animation: slideInRight 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
                     }
                     .reveal {
                         opacity: 0;
@@ -146,337 +167,1082 @@ export default function Welcome() {
                     }
                 `}
             </style>
+            {/* Hero Section */}
             <div className="relative w-full px-0 pt-40 pb-24 flex flex-col justify-center min-h-[90vh] text-left overflow-hidden">
-                {/* Removed Hero Background Gradient to allow the global background image to stand out */}
+                <div className="animate-fade-in-up flex flex-col md:flex-row items-center justify-between w-full max-w-7xl mx-auto px-6 z-10 gap-12">
+                    <div className="flex flex-col items-start w-full md:w-1/2 lg:w-3/5">
+                        <h1 className="text-6xl md:text-5xl lg:text-[90px] font-extrabold tracking-tight text-gray-900 dark:text-white leading-none mb-6 mt-8 md:mt-0 drop-shadow-[0_0_15px_rgba(255,255,255,0.1)]">
+                            Hi, I'm Kylle
+                        </h1>
 
-                <div className="animate-fade-in-up flex flex-col items-start w-full max-w-6xl mx-auto px-6 z-10">
-                    <h1 className="text-5xl md:text-7xl lg:text-[80px] font-bold mb-2 tracking-tight text-gray-900 dark:text-white leading-[1.1]">
-                        Hi, I'm Kylle Edrian
-                    </h1>
+                        <div className="inline-block relative mb-8">
+                            <h2 className="text-3xl md:text-4xl lg:text-3xl font-bold text-sky-primary tracking-tight min-h-[40px] md:min-h-[48px]">
+                                <Typewriter
+                                    text="Aspiring Web Developer"
+                                    delay={100}
+                                />
+                            </h2>
+                        </div>
 
-                    <h2 className="text-3xl md:text-5xl lg:text-2xl font-bold text-[var(--color-sky-primary)] mb-6">
-                        Aspiring Web Developer
-                    </h2>
+                        <p className="text-lg md:text-xl text-gray-600 dark:text-gray-400 mb-10 max-w-3xl leading-relaxed">
+                            I am 22 years old and i am a fresh graduate and an
+                            aspiring web developer passionate about building
+                            clean, modern web applications. Currently looking
+                            for opportunities to grow, contribute to a great
+                            team, and deliver beautiful digital experiences.
+                        </p>
 
-                    <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 mb-10 max-w-3xl leading-relaxed">
-                        I am a fresh graduate and an aspiring web developer passionate about building clean, modern web applications. Currently looking for opportunities to grow, contribute to a great team, and deliver beautiful digital experiences.
-                    </p>
-
-                    <div className="flex flex-row gap-4 items-center">
-                        <Link href="#projects" onClick={(e) => scrollToSection(e, 'projects')} className="bg-[var(--color-sky-primary)] hover:bg-[var(--color-sky-hover)] text-white font-semibold py-3 px-8 rounded-lg transition-all duration-300 shadow-md flex items-center justify-center">
-                            Hire Me
-                        </Link>
-                        <Link href="#contact" onClick={(e) => scrollToSection(e, 'contact')} className="bg-white border border-gray-200 hover:border-gray-400 hover:text-gray-500 text-[var(--color-sky-dark)] font-semibold py-3 px-8 rounded-2xl transition-all duration-300 flex items-center justify-center shadow-md hover:shadow-lg hover:shadow-blue-300 dark:bg-transparent dark:border-gray-700 dark:text-[var(--color-sky-light)] dark:hover:border-gray-400 dark:hover:text-gray-400">
-                            Let's Talk
-                        </Link>
+                        <div className="flex flex-col gap-8">
+                            <div className="flex flex-wrap gap-4 items-center">
+                                <Link
+                                    href="#projects"
+                                    onClick={(e) =>
+                                        scrollToSection(e, "projects")
+                                    }
+                                    className="bg-sky-primary hover:bg-sky-600 text-white font-semibold py-4 px-8 rounded-full transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+                                >
+                                    Hire Me
+                                </Link>
+                                <Link
+                                    href="#contact"
+                                    onClick={(e) =>
+                                        scrollToSection(e, "contact")
+                                    }
+                                    className="bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-white/10 hover:border-sky-300 dark:hover:border-sky-500/50 text-sky-primary dark:text-sky-400 font-semibold py-4 px-8 rounded-full transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+                                >
+                                    Let's Talk
+                                </Link>
+                            </div>
+                            <div className="flex flex-col md:flex-row md:items-center gap-8">
+                                <div className="flex items-center gap-5">
+                                    {[
+                                        {
+                                            name: "GitHub",
+                                            icon: Github,
+                                            url: "https://github.com/kylleedriangalceran-ops?tab=repositories",
+                                        },
+                                        {
+                                            name: "LinkedIn",
+                                            icon: Linkedin,
+                                            url: "https://www.linkedin.com/in/kylle-edrian-galceran-b03a1b328/",
+                                        },
+                                        {
+                                            name: "Facebook",
+                                            icon: Facebook,
+                                            url: "https://www.facebook.com/khael.galceran",
+                                        },
+                                        {
+                                            name: "Instagram",
+                                            icon: Instagram,
+                                            url: "https://www.instagram.com/kyyyllee_/",
+                                        },
+                                    ].map((social, i) => {
+                                        const Icon = social.icon;
+                                        return (
+                                            <a
+                                                key={i}
+                                                href={social.url}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-gray-400 hover:text-sky-primary transition-colors transform hover:scale-110"
+                                                aria-label={social.name}
+                                            >
+                                                <Icon
+                                                    className="w-6 h-6"
+                                                    strokeWidth={1.5}
+                                                />
+                                            </a>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-                    <Link href="#about" onClick={(e) => scrollToSection(e, 'about')} className="mt-24 text-gray-400 dark:text-gray-600 hover:text-[var(--color-sky-primary)] dark:hover:text-[var(--color-sky-primary)] transition-colors duration-300 animate-bounce">
-                        <svg className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-                            <path d="M6 9l6 6 6-6"></path>
-                        </svg>
+                    <div className="w-full md:w-1/2 lg:w-2/5 flex justify-center md:justify-end mt-12 md:-mt-24 lg:-mt-40 xl:-mt-64 pointer-events-none">
+                        <div className="relative group w-[350px] h-[350px] md:w-[500px] md:h-[500px] lg:w-[700px] lg:h-[700px]">
+                            <div
+                                className="relative w-full h-full overflow-hidden"
+                                style={{
+                                    WebkitMaskImage:
+                                        "radial-gradient(circle at 45% 45%, black 40%, transparent 75%)",
+                                    maskImage:
+                                        "radial-gradient(circle at 45% 45%, black 40%, transparent 75%)",
+                                }}
+                            >
+                                <img
+                                    src="/images/profile/kylle.png"
+                                    alt="Kylle"
+                                    className="w-full h-full object-cover object-top opacity-90 transition-all duration-700"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="w-full flex justify-center mt-24 text-center">
+                    <Link
+                        href="#about"
+                        onClick={(e) => scrollToSection(e, "about")}
+                        className="text-gray-400 dark:text-gray-600 hover:text-sky-primary dark:hover:text-sky-primary transition-colors duration-300 animate-bounce"
+                    >
+                        <ChevronDown className="w-8 h-8" strokeWidth={2.5} />
                     </Link>
                 </div>
             </div>
 
+            {/* Section Divider */}
+            <div className="w-full h-px bg-linear-to-r from-transparent via-sky-primary/20 to-transparent"></div>
+
             {/* About Section */}
-            <section id="about" className="py-24 bg-gray-50/50 dark:bg-[#161615]/50 border-y border-gray-100 dark:border-[#3E3E3A]">
-                <div ref={aboutRef} className={`max-w-4xl mx-auto px-6 text-center reveal ${aboutIsVisible ? 'visible' : ''}`}>
-                    <span className="text-[var(--color-sky-primary)] font-semibold tracking-widest text-xs uppercase mb-4 block">About Me</span>
-                    <h2 className="text-3xl md:text-4xl font-bold mb-16 text-gray-900 dark:text-white">A little bit about myself</h2>
-
-                    <div className="flex flex-col md:flex-row items-center gap-12 text-left">
-                        <div className="w-1/3 flex justify-center">
-                            {/* Profile image */}
-                            <div className="w-48 h-48 bg-gray-200 dark:bg-gray-800 rounded-2xl overflow-hidden relative shadow-xl shadow-gray-200/50 dark:shadow-none shadow-[var(--color-sky-primary)]/10">
-                                <img src="/images/profile/kylle.jpg" alt="Kylle Edrian" className="w-full h-full object-cover transition-all duration-500" />
-                            </div>
+            <section
+                id="about"
+                ref={aboutRef}
+                className={`relative py-40 bg-transparent transition-colors duration-300 reveal overflow-hidden ${
+                    aboutIsVisible ? "visible" : ""
+                }`}
+            >
+                <div className="max-w-7xl mx-auto px-6 relative">
+                    {/* Section Header - Centered as per screenshot */}
+                    {/* Section Header */}
+                    <div className="text-center mb-16 flex flex-col items-center">
+                        <div className="inline-flex items-center gap-3 mb-4">
+                            <span className="text-xl md:text-xl font-bold text-sky-primary tracking-[0.2em] uppercase">
+                                About Me
+                            </span>
                         </div>
-                        <div className="w-full md:w-2/3 space-y-6 text-gray-600 dark:text-gray-300 leading-relaxed">
-                            <p>
-                                I'm a fresh graduate and an aspiring full-stack web developer with a strong foundation in Laravel, React, and Inertia.js. I'm passionate about creating clean, user-friendly applications and I'm actively looking for opportunities to join a company where I can learn, grow, and make an impact.
-                            </p>
-                            <p>
-                                I love exploring new technologies, taking on challenges, and continuously sharpening my skills. I'm excited to bring my enthusiasm and dedication to a team that values innovation and collaboration.
-                            </p>
-                        </div>
+                        <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white tracking-tight mb-4">
+                            A little bit about myself
+                        </h2>
+                        <p className="text-gray-500 dark:text-gray-400 text-lg">
+                            Who am I
+                        </p>
                     </div>
-                </div>
-            </section>
 
-            {/* Skills Section */}
-            <section id="skills" className="py-24">
-                <div ref={skillsRef} className={`max-w-5xl mx-auto px-6 text-center reveal ${skillsIsVisible ? 'visible' : ''}`}>
-                    <span className="text-[var(--color-sky-primary)] font-semibold tracking-widest text-xs uppercase mb-4 block">Skills</span>
-                    <h2 className="text-3xl md:text-4xl font-bold mb-16 text-gray-900 dark:text-white">Technologies I work with</h2>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
-                        {/* Skill Cards */}
-                        {[
-                            {
-                                name: 'Back-end Development',
-                                icon: 'M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01',
-                                skills: [
-                                    { name: 'Laravel', logo: '/images/logos/laravel.png' },
-                                    { name: 'Django', logo: '/images/logos/django.png' },
-                                    { name: 'JavaScript', logo: '/images/logos/JS.png' },
-                                    { name: 'MySQL', logo: '/images/logos/MySQL.png' },
-                                    { name: 'PostgreSQL', logo: '/images/logos/postgre.jpg' }
-                                ]
-                            },
-                            {
-                                name: 'Front-end Development',
-                                icon: 'M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4',
-                                skills: [
-                                    { name: 'Vue', logo: '/images/logos/vuee.png' },
-                                    { name: 'React', logo: '/images/logos/react.png' },
-                                    { name: 'Next.js', logo: '/images/logos/next.png' },
-                                    { name: 'TailwindCSS', logo: '/images/logos/tailwind.png' },
-                                    { name: 'Bootstrap', logo: '/images/logos/bootstrap.png' }
-                                ]
-                            },
-                            {
-                                name: 'UI/UX Design',
-                                icon: 'M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z',
-                                skills: [
-                                    { name: 'Figma', logo: '/images/logos/figma.png' }
-                                ]
-                            },
-                            {
-                                name: 'Inertia.js (The Bridge)',
-                                icon: 'M13 10V3L4 14h7v7l9-11h-7z',
-                                description: 'A seamless middleware routing library that perfectly bridges my Laravel backend and React/Vue frontend together. It creates a modern Single Page App (SPA) feel, eliminating the complexity of building separate API endpoints.',
-                                skills: [
-                                    { name: 'Inertia.js', logo: '/images/logos/inertia.png' }
-                                ]
-                            }
-                        ].map((category, i) => (
-                            <div key={i} className="bg-white dark:bg-[#161615] border border-gray-100 dark:border-[#3E3E3A] p-8 rounded-xl shadow-sm hover:shadow-md transition-shadow group flex flex-col h-full">
-                                <div className="flex items-center gap-4 mb-6">
-                                    <div className="text-gray-900 dark:text-white group-hover:scale-110 transition-transform">
-                                        <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={category.icon} />
-                                        </svg>
-                                    </div>
-                                    <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">{category.name}</h3>
+                    {/* Main Content: Two Columns */}
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20 items-start">
+                        {/* Profile Image Column (5/12 width) */}
+                        <div className="lg:col-span-5 flex flex-col items-center">
+                            <div className="relative group">
+                                <div
+                                    className="relative w-80 h-80 md:w-96 md:h-96 overflow-hidden"
+                                    style={{
+                                        WebkitMaskImage:
+                                            "radial-gradient(circle at 50% 50%, black 45%, transparent 80%)",
+                                        maskImage:
+                                            "radial-gradient(circle at 50% 50%, black 45%, transparent 80%)",
+                                    }}
+                                >
+                                    <img
+                                        src="/images/profile/kylle.png"
+                                        alt="Kylle Edrian"
+                                        className="w-full h-full object-cover object-top transition-transform duration-700 hover:scale-105"
+                                    />
                                 </div>
 
-                                {category.description && (
-                                    <p className="text-gray-500 dark:text-gray-400 leading-relaxed text-sm lg:text-base mb-6">
-                                        {category.description}
+                                <div className="mt-8 text-center">
+                                    <a
+                                        href="/images/profile/galceran.pdf"
+                                        download="Kylle_Edrian_Galceran_CV.pdf"
+                                        className="inline-flex items-center gap-2 text-gray-500 dark:text-gray-400 hover:text-sky-primary dark:hover:text-sky-primary transition-all duration-300 font-medium tracking-wide group"
+                                    >
+                                        <Download className="w-5 h-5 transition-transform group-hover:translate-y-0.5" />
+                                        <span>Download CV</span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Content Column (7/12 width) */}
+                        <div className="lg:col-span-7 space-y-10">
+                            <div className="space-y-6">
+                                <h3 className="text-3xl md:text-4xl font-extrabold text-gray-900 dark:text-white flex flex-wrap items-center gap-x-3">
+                                    Hello! I'm{" "}
+                                    <span className="text-sky-500 dark:text-sky-300">
+                                        Kylle Edrian
+                                    </span>
+                                </h3>
+
+                                <div className="space-y-6 text-base md:text-[1.05rem] text-gray-500/90 dark:text-gray-400 leading-[1.8] font-normal">
+                                    <p>
+                                        I'm a fresh graduate with a Bachelor of
+                                        Science in Information Technology from
+                                        Mindanao State University at Naawan. I
+                                        discovered my passion for web
+                                        development during college, the thrill
+                                        of turning ideas into real, interactive
+                                        applications hooked me instantly.
                                     </p>
-                                )}
-
-                                <div className="flex flex-wrap gap-3 mt-auto pt-2 border-t border-transparent">
-                                    {category.skills.map((skill, index) => (
-                                        <div key={index} className="flex items-center gap-2.5 px-4 py-2.5 bg-gray-50 dark:bg-[#20201e] text-gray-700 dark:text-gray-300 text-sm font-medium rounded-xl border border-gray-200 dark:border-[#393936] hover:border-[var(--color-sky-primary)] dark:hover:border-[var(--color-sky-primary)] transition-colors cursor-default">
-                                            <img src={skill.logo} alt={skill.name} className="w-6 h-6 object-contain" />
-                                            <span>{skill.name}</span>
-                                        </div>
-                                    ))}
+                                    <p>
+                                        I believe in writing clean, readable
+                                        code and building applications that
+                                        don't just work, but feel great to use.
+                                        I'm a detail-oriented person who
+                                        genuinely enjoys the process of refining
+                                        an interface until it's just right. I'm
+                                        actively looking for opportunities to
+                                        join a team where i can learn from
+                                        experienced developers, grow my skills,
+                                        and contribute to something meaningful.
+                                    </p>
                                 </div>
                             </div>
-                        ))}
+
+                            {/* Tags / Skills Badges */}
+                        </div>
                     </div>
-                </div>
-            </section>
 
-            {/* Projects Section */}
-            <section id="projects" className="py-24 bg-gray-50/50 dark:bg-[#161615]/50 border-y border-gray-100 dark:border-[#3E3E3A]">
-                <div ref={projectsRef} className={`max-w-6xl mx-auto px-6 text-center reveal ${projectsIsVisible ? 'visible' : ''}`}>
-                    <span className="text-[var(--color-sky-primary)] font-semibold tracking-widest text-xs uppercase mb-4 block">Projects</span>
-                    <h2 className="text-3xl md:text-4xl font-bold mb-16 text-gray-900 dark:text-white">Featured work</h2>
-
-                    <div
-                        className="relative"
-                        onMouseEnter={() => setIsHovered(true)}
-                        onMouseLeave={() => {
-                            setIsHovered(false);
-                            setIsDragging(false);
-                        }}
-                    >
-                        {/* Carousel Container */}
-                        <div
-                            className="overflow-hidden rounded-2xl cursor-grab active:cursor-grabbing"
-                            onTouchStart={onTouchStart}
-                            onTouchMove={onTouchMove}
-                            onTouchEnd={onTouchEnd}
-                            onMouseDown={onTouchStart}
-                            onMouseMove={onTouchMove}
-                            onMouseUp={onTouchEnd}
-                        >
-                            <div
-                                className={`flex transition-transform duration-500 ease-out ${isDragging ? 'transition-none' : ''}`}
-                                style={{ transform: `translateX(-${currentSlide * 100}%)` }}
-                            >
-                                {projects.map((project, i) => (
-                                    <div key={i} className="w-full flex-shrink-0 px-4">
-                                        <div className="bg-white dark:bg-[#202020] border border-gray-100 dark:border-[#3E3E3A] p-8 md:p-12 rounded-2xl shadow-sm text-left flex flex-col h-full mx-auto max-w-4xl">
-                                            {/* Status Badge */}
-                                            <div className="flex items-center justify-between mb-6">
-                                                <span className={`text-sm font-semibold px-4 py-1.5 rounded-full ${
-                                                    project.status === 'Finished'
-                                                        ? 'bg-emerald-100 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
-                                                        : project.status === 'In Progress'
-                                                        ? 'bg-amber-100 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400'
-                                                        : project.status === 'Almost Finished'
-                                                        ? 'bg-blue-100 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400'
-                                                        : 'bg-gray-100 dark:bg-gray-500/10 text-gray-600 dark:text-gray-400'
-                                                }`}>
-                                                    {project.status === 'Finished' && '✓ '}{project.status}
-                                                </span>
-                                                <span className="text-sm font-bold text-gray-500 dark:text-gray-400">{project.progress}%</span>
-                                            </div>
-
-                                            <h3 className="text-2xl md:text-3xl font-bold mb-4 text-gray-900 dark:text-gray-100 transition-colors">{project.title}</h3>
-                                            <p className="text-gray-500 dark:text-gray-400 mb-8 text-base md:text-lg leading-relaxed flex-grow">{project.desc}</p>
-
-                                            {/* Progress Bar */}
-                                            <div className="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-2 mb-8 overflow-hidden">
-                                                <div
-                                                    className={`h-2 rounded-full transition-all duration-1000 ${
-                                                        project.progress === 100
-                                                            ? 'bg-emerald-500'
-                                                            : project.progress >= 75
-                                                            ? 'bg-blue-500'
-                                                            : project.progress >= 40
-                                                            ? 'bg-amber-500'
-                                                            : 'bg-gray-400'
-                                                    }`}
-                                                    style={{ width: `${project.progress}%` }}
-                                                ></div>
-                                            </div>
-
-                                            <div className="flex flex-wrap gap-3 mb-8">
-                                                {project.tags.map((tag, idx) => (
-                                                    <div key={idx} className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 dark:bg-[#303030] text-gray-700 dark:text-gray-300 text-sm font-medium rounded-full border border-gray-200 dark:border-[#404040]">
-                                                        <img src={tag.logo} alt={tag.name} className="w-5 h-5 object-contain" />
-                                                        <span>{tag.name}</span>
-                                                    </div>
-                                                ))}
-                                            </div>
-
-                                            <a href="#" className="inline-flex items-center text-base font-semibold text-[var(--color-sky-primary)] hover:text-[var(--color-sky-hover)] group/link mt-auto w-max">
-                                                View Project Details
-                                                <svg className="w-5 h-5 ml-1 transform group-hover/link:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                                                </svg>
-                                            </a>
-                                        </div>
-                                    </div>
+                    {/* Interest Cards */}
+                    <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8">
+                        {/* Tech Interests */}
+                        <div className="bg-white/90 dark:bg-[#111111]/80 backdrop-blur-md rounded-[2.5rem] p-10 shadow-xl dark:shadow-2xl shadow-gray-200/50 dark:shadow-black/40 border border-gray-100 dark:border-white/5 transition-all duration-300 flex flex-col h-full group hover:border-sky-500/30">
+                            <div className="flex items-center gap-4 mb-6">
+                                <div className="w-12 h-12 rounded-full bg-sky-50 dark:bg-sky-900/10 flex items-center justify-center">
+                                    <Lightbulb
+                                        className="w-6 h-6 text-sky-500"
+                                        strokeWidth={1.5}
+                                    />
+                                </div>
+                                <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
+                                    Tech Interests
+                                </h3>
+                            </div>
+                            <p className="text-gray-600 dark:text-gray-400 leading-relaxed mb-8 grow">
+                                I'm passionate about full-stack web development
+                                — building everything from pixel-perfect
+                                front-ends to robust server-side architectures.
+                                I love exploring modern frameworks and crafting
+                                seamless user experiences.
+                            </p>
+                            <div className="flex flex-wrap gap-2 mt-auto">
+                                {[
+                                    "Laravel",
+                                    "React",
+                                    "Inertia.js",
+                                    "UI/UX Design",
+                                    "REST APIs",
+                                ].map((tech, index) => (
+                                    <span
+                                        key={index}
+                                        className="px-3 py-1 bg-sky-50 dark:bg-sky-900/20 text-sky-700 dark:text-sky-300 rounded-lg text-xs font-semibold border border-sky-100 dark:border-sky-800/30"
+                                    >
+                                        {tech}
+                                    </span>
                                 ))}
                             </div>
                         </div>
 
-                        {/* Carousel Controls */}
-                        <button onClick={prevSlide} className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 md:-translate-x-6 w-12 h-12 flex items-center justify-center bg-white dark:bg-[#202020] border border-gray-200 dark:border-[#3E3E3A] rounded-full shadow-md text-gray-600 dark:text-gray-300 hover:text-[var(--color-sky-primary)] hover:border-[var(--color-sky-primary)] transition-all z-10">
-                            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
-                        </button>
-                        <button onClick={nextSlide} className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-2 md:translate-x-6 w-12 h-12 flex items-center justify-center bg-white dark:bg-[#202020] border border-gray-200 dark:border-[#3E3E3A] rounded-full shadow-md text-gray-600 dark:text-gray-300 hover:text-[var(--color-sky-primary)] hover:border-[var(--color-sky-primary)] transition-all z-10">
-                            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
-                        </button>
+                        {/* Currently Learning */}
+                        <div className="bg-white/90 dark:bg-[#111111]/80 backdrop-blur-md rounded-[2.5rem] p-10 shadow-xl dark:shadow-2xl shadow-gray-200/50 dark:shadow-black/40 border border-gray-100 dark:border-white/5 transition-all duration-300 flex flex-col h-full group hover:border-sky-500/30">
+                            <div className="flex items-center gap-4 mb-6">
+                                <div className="w-12 h-12 rounded-full bg-sky-50 dark:bg-sky-900/10 flex items-center justify-center">
+                                    <Rocket
+                                        className="w-6 h-6 text-sky-500"
+                                        strokeWidth={1.5}
+                                    />
+                                </div>
+                                <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
+                                    Currently Learning
+                                </h3>
+                            </div>
+                            <p className="text-gray-600 dark:text-gray-400 leading-relaxed mb-8 grow">
+                                I never stop learning. Right now I'm deepening
+                                my knowledge in advanced React patterns,
+                                exploring Next.js for SSR/SSG, and improving my
+                                understanding of database optimization and
+                                deployment workflows.
+                            </p>
+                            <div className="flex flex-wrap gap-2 mt-auto">
+                                {[
+                                    "Advanced React",
+                                    "Next.js",
+                                    "TypeScript",
+                                    "Nuxt.js",
+                                    "Docker",
+                                ].map((tech, index) => (
+                                    <span
+                                        key={index}
+                                        className="px-3 py-1 bg-sky-50 dark:bg-sky-900/20 text-sky-700 dark:text-sky-300 rounded-lg text-xs font-semibold border border-sky-100 dark:border-sky-800/30"
+                                    >
+                                        {tech}
+                                    </span>
+                                ))}
+                            </div>
+                        </div>
 
-                        {/* Carousel Indicators */}
-                        <div className="flex justify-center gap-2 mt-8">
-                            {projects.map((_, i) => (
-                                <button
-                                    key={i}
-                                    onClick={() => setCurrentSlide(i)}
-                                    className={`w-3 h-3 rounded-full transition-all ${currentSlide === i ? 'bg-[var(--color-sky-primary)] w-8' : 'bg-gray-300 dark:bg-gray-600 hover:bg-gray-400'}`}
-                                    aria-label={`Go to slide ${i + 1}`}
-                                />
-                            ))}
+                        {/* Hobbies & Interests */}
+                        <div className="bg-white/90 dark:bg-[#111111]/80 backdrop-blur-md rounded-[2.5rem] p-10 shadow-xl dark:shadow-2xl shadow-gray-200/50 dark:shadow-black/40 border border-gray-100 dark:border-white/5 transition-all duration-300 flex flex-col h-full group hover:border-sky-500/30">
+                            <div className="flex items-center gap-4 mb-6">
+                                <div className="w-12 h-12 rounded-full bg-sky-50 dark:bg-sky-900/10 flex items-center justify-center">
+                                    <Heart
+                                        className="w-6 h-6 text-sky-500"
+                                        strokeWidth={1.5}
+                                    />
+                                </div>
+                                <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
+                                    Hobbies & Interests
+                                </h3>
+                            </div>
+                            <p className="text-gray-600 dark:text-gray-400 leading-relaxed mb-8 grow">
+                                When I'm not coding, you'll find me playing
+                                mobile games, enjoying music, watching anime and
+                                movies, or playing basketball. I believe a
+                                balanced life fuels better creativity and focus.
+                            </p>
+                            <div className="flex flex-wrap gap-2 mt-auto">
+                                {[
+                                    "Basketball",
+                                    "Mobile Games",
+                                    "Music",
+                                    "Anime",
+                                    "Movies",
+                                ].map((hobby, index) => (
+                                    <span
+                                        key={index}
+                                        className="px-3 py-1 bg-sky-50 dark:bg-sky-900/20 text-sky-700 dark:text-sky-300 rounded-lg text-xs font-semibold border border-sky-100 dark:border-sky-800/30"
+                                    >
+                                        {hobby}
+                                    </span>
+                                ))}
+                            </div>
                         </div>
                     </div>
                 </div>
             </section>
 
-            {/* Contact Section */}
-            <section id="contact" className="py-24">
-                <div ref={contactRef} className={`max-w-2xl mx-auto px-6 text-center reveal ${contactIsVisible ? 'visible' : ''}`}>
-                    <span className="text-[var(--color-sky-primary)] font-semibold tracking-widest text-xs uppercase mb-4 block">Contact</span>
-                    <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gray-900 dark:text-white">Get in touch</h2>
-                    <p className="text-gray-500 dark:text-gray-400 mb-12">Have a project in mind or looking to hire? Let's connect.</p>
+            {/* Section Divider */}
+            <div className="w-full h-px bg-linear-to-r from-transparent via-sky-primary/20 to-transparent"></div>
 
-                    <div className="bg-white dark:bg-[#161615] border border-gray-100 dark:border-[#3E3E3A] p-8 rounded-2xl shadow-sm">
-                        <form className="space-y-4" onSubmit={async (e) => {
-                            e.preventDefault();
-
-                            // Import gooeyToast dynamically
-                            const { gooeyToast } = await import('goey-toast');
-
-                            try {
-                                // TODO: Replace this with your actual Axios/Inertia form submission
-                                // await axios.post('/contact', formData);
-
-                                gooeyToast.success('Message Sent', {
-                                    description: 'Thanks for reaching out! I will get back to you soon.',
-                                    action: {
-                                        label: 'Undo',
-                                        onClick: () => {},
-                                    },
-                                    borderColor: '#E0E0E0',
-                                    borderWidth: 2,
-                                });
-                                e.target.reset();
-                            } catch (error) {
-                                // Example Error Toast
-                                gooeyToast.error('Failed to send', {
-                                    description: 'Something went wrong while sending your message. Please try again.',
-                                    borderColor: '#ff4d4f',
-                                    borderWidth: 2,
-                                });
-                            }
-                        }}>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <input
-                                    type="text"
-                                    placeholder="Your name"
-                                    required
-                                    className="w-full bg-gray-50 dark:bg-[#0a0a0a] border border-gray-200 dark:border-[#3E3E3A] rounded-lg px-4 py-3 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[var(--color-sky-primary)] focus:border-transparent transition-shadow"
-                                />
-                                <input
-                                    type="email"
-                                    placeholder="Your email"
-                                    required
-                                    className="w-full bg-gray-50 dark:bg-[#0a0a0a] border border-gray-200 dark:border-[#3E3E3A] rounded-lg px-4 py-3 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[var(--color-sky-primary)] focus:border-transparent transition-shadow"
-                                />
-                            </div>
-                            <textarea
-                                rows="5"
-                                placeholder="Your message"
-                                required
-                                className="w-full bg-gray-50 dark:bg-[#0a0a0a] border border-gray-200 dark:border-[#3E3E3A] rounded-lg px-4 py-3 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[var(--color-sky-primary)] focus:border-transparent transition-shadow resize-none"
-                            ></textarea>
-
-                            <div className="text-left">
-                                <button type="submit" className="bg-[var(--color-sky-primary)] hover:bg-[var(--color-sky-hover)] text-white font-medium py-3 px-8 rounded-lg transition-colors flex items-center justify-center gap-2 group cursor-pointer">
-                                    Send Message
-                                    <svg className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                                    </svg>
-                                </button>
-                            </div>
-                        </form>
+            {/* Education Section */}
+            <section
+                id="education"
+                ref={educationRef}
+                className={`relative py-32 bg-transparent transition-colors duration-300 reveal ${
+                    educationIsVisible ? "visible" : ""
+                }`}
+            >
+                <div className="max-w-6xl mx-auto px-6">
+                    {/* Education Section Header */}
+                    <div className="text-center mb-20 flex flex-col items-center">
+                        <div className="inline-flex items-center gap-3 mb-4">
+                            <span className="text-xl md:text-xl font-bold text-sky-primary tracking-[0.2em] uppercase">
+                                Education
+                            </span>
+                        </div>
+                        <h2 className="text-4xl md:text-5xl font-extrabold text-[#0B1528] dark:text-white tracking-tight mb-4">
+                            My Academic Journey
+                        </h2>
+                        <p className="text-gray-500 dark:text-gray-400 text-lg">
+                            The milestones that shaped my path into technology.
+                        </p>
                     </div>
 
-                    <div className="pt-16 pb-8 flex justify-center gap-8">
-                        <a href="https://mail.google.com/mail/u/0/#inbox" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-gray-900 dark:hover:text-white transition-all transform hover:scale-110">
-                            <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
-                        </a>
-                        <a href="https://github.com/kylleedriangalceran-ops" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-gray-900 dark:hover:text-white transition-all transform hover:scale-110">
-                            <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path fillRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 100.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clipRule="evenodd" /></svg>
-                        </a>
-                        <a href="https://facebook.com/" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-gray-900 dark:hover:text-white transition-all transform hover:scale-110">
-                            <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path fillRule="evenodd" d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" clipRule="evenodd" /></svg>
-                        </a>
-                    </div>
+                    {/* Timeline Container */}
+                    <div className="relative max-w-5xl mx-auto mt-12 pb-10">
+                        {/* Center Line Desktop + Mobile Line */}
+                        <div
+                            className="absolute left-[27px] md:left-1/2 top-0 bottom-0 w-px bg-sky-200 dark:bg-white/10"
+                            style={{ transform: "translateX(-50%)" }}
+                        ></div>
 
-                    <div className="text-sm text-gray-400 mt-4">
-                        &copy; 2026 Kylle Edrian. Built with passion.
+                        <div className="space-y-16">
+                            {/* Item 1: College */}
+                            <div className="relative flex flex-col md:flex-row items-center justify-between group">
+                                {/* Desktop Center Dot */}
+                                <div
+                                    className="absolute left-[27px] md:left-1/2 w-10 h-10 rounded-full flex items-center justify-center z-10"
+                                    style={{ transform: "translateX(-50%)" }}
+                                >
+                                    <div className="w-[18px] h-[18px] rounded-full border-[4px] border-white dark:border-[#111111] bg-sky-300 ring-[6px] ring-sky-50 dark:ring-sky-900/40"></div>
+                                </div>
+
+                                {/* Content: Left for Desktop */}
+                                <div className="w-full md:w-1/2 md:pr-12 md:text-right pl-16 md:pl-0 z-10 flex flex-col items-start md:items-end">
+                                    <h3 className="text-[1.35rem] md:text-[1.7rem] font-bold text-[#0B1528] dark:text-white leading-tight mb-1">
+                                        Bachelor of Science in Information
+                                        Technology
+                                    </h3>
+                                    <div className="flex items-center gap-1.5 text-gray-500 dark:text-gray-400 text-sm md:text-[15px]">
+                                        <MapPin className="w-4 h-4 shrink-0" />
+                                        <span>
+                                            Mindanao State University at Naawan
+                                        </span>
+                                    </div>
+                                </div>
+
+                                {/* Meta: Right for Desktop */}
+                                <div className="w-full md:w-1/2 md:pl-12 pl-16 md:pl-0 mt-4 md:mt-0 z-10 flex flex-col items-start md:items-start md:pt-1">
+                                    <div className="inline-flex items-center">
+                                        <span className="px-3 md:px-4 py-1.5 rounded-full bg-sky-50 dark:bg-sky-500/10 text-sky-500 text-[11px] md:text-xs font-bold tracking-widest uppercase">
+                                            2022 - PRESENT
+                                        </span>
+                                    </div>
+                                    <span className="text-[11px] font-bold text-gray-400 tracking-[0.2em] uppercase mt-2 md:ml-2">
+                                        COLLEGE
+                                    </span>
+                                </div>
+                            </div>
+
+                            {/* Item 2: Senior High School */}
+                            <div className="relative flex flex-col md:flex-row items-center justify-between group">
+                                {/* Desktop Center Dot */}
+                                <div
+                                    className="absolute left-[27px] md:left-1/2 w-10 h-10 rounded-full flex items-center justify-center z-10"
+                                    style={{ transform: "translateX(-50%)" }}
+                                >
+                                    <div className="w-3.5 h-3.5 rounded-full bg-gray-300 dark:bg-gray-600 ring-[5px] ring-white dark:ring-[#111111]"></div>
+                                </div>
+
+                                {/* Content: Right for Desktop */}
+                                <div className="order-1 md:order-2 w-full md:w-1/2 md:pl-12 pl-16 md:pl-0 z-10 flex flex-col items-start md:items-start">
+                                    <h3 className="text-[1.35rem] md:text-[1.7rem] font-bold text-[#0B1528] dark:text-white leading-tight mb-1">
+                                        Electrical Installation Maintenance
+                                    </h3>
+                                    <div className="flex items-center justify-start gap-1.5 text-gray-500 dark:text-gray-400 text-[15px]">
+                                        <MapPin className="w-4 h-4 shrink-0" />
+                                        <span>
+                                            Iligan City East National High
+                                            School
+                                        </span>
+                                    </div>
+                                </div>
+
+                                {/* Meta: Left for Desktop */}
+                                <div className="order-2 md:order-1 w-full md:w-1/2 md:pr-12 md:text-right pl-16 md:pl-0 mt-4 md:mt-0 z-10 flex flex-col items-start md:items-end md:pt-1">
+                                    <div className="inline-flex items-center">
+                                        <span className="px-3 md:px-4 py-1.5 rounded-full bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-gray-400 text-[11px] md:text-xs font-bold tracking-widest uppercase">
+                                            2020 - 2022
+                                        </span>
+                                    </div>
+                                    <span className="text-[11px] font-bold text-gray-400 tracking-[0.2em] uppercase mt-2 md:mr-2">
+                                        SENIOR HIGH SCHOOL
+                                    </span>
+                                </div>
+                            </div>
+
+                            {/* Item 3: Junior High School */}
+                            <div className="relative flex flex-col md:flex-row items-center justify-between group">
+                                {/* Desktop Center Dot */}
+                                <div
+                                    className="absolute left-[27px] md:left-1/2 w-10 h-10 rounded-full flex items-center justify-center z-10"
+                                    style={{ transform: "translateX(-50%)" }}
+                                >
+                                    <div className="w-3.5 h-3.5 rounded-full bg-gray-300 dark:bg-gray-600 ring-[5px] ring-white dark:ring-[#111111]"></div>
+                                </div>
+
+                                {/* Content: Left for Desktop */}
+                                <div className="w-full md:w-1/2 md:pr-12 md:text-right pl-16 md:pl-0 z-10 flex flex-col items-start md:items-end">
+                                    <h3 className="text-[1.35rem] md:text-[1.7rem] font-bold text-[#0B1528] dark:text-white leading-tight mb-1">
+                                        Basic Education Curriculum
+                                    </h3>
+                                    <div className="flex items-center gap-1.5 text-gray-500 dark:text-gray-400 text-[15px]">
+                                        <MapPin className="w-4 h-4 shrink-0" />
+                                        <span>
+                                            Iligan City East National High
+                                            School
+                                        </span>
+                                    </div>
+                                </div>
+
+                                {/* Meta: Right for Desktop */}
+                                <div className="w-full md:w-1/2 md:pl-12 pl-16 md:pl-0 mt-4 md:mt-0 z-10 flex flex-col items-start md:items-start md:pt-1">
+                                    <div className="inline-flex items-center">
+                                        <span className="px-3 md:px-4 py-1.5 rounded-full bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-gray-400 text-[11px] md:text-xs font-bold tracking-widest uppercase">
+                                            2016 - 2020
+                                        </span>
+                                    </div>
+                                    <span className="text-[11px] font-bold text-gray-400 tracking-[0.2em] uppercase mt-2 md:ml-2">
+                                        JUNIOR HIGH SCHOOL
+                                    </span>
+                                </div>
+                            </div>
+
+                            {/* Item 4: Elementary */}
+                            <div className="relative flex flex-col md:flex-row items-center justify-between group">
+                                {/* Desktop Center Dot */}
+                                <div
+                                    className="absolute left-[27px] md:left-1/2 w-10 h-10 rounded-full flex items-center justify-center z-10"
+                                    style={{ transform: "translateX(-50%)" }}
+                                >
+                                    <div className="w-3.5 h-3.5 rounded-full bg-gray-300 dark:bg-gray-600 ring-[5px] ring-white dark:ring-[#111111]"></div>
+                                </div>
+
+                                {/* Content: Right for Desktop */}
+                                <div className="order-1 md:order-2 w-full md:w-1/2 md:pl-12 pl-16 md:pl-0 z-10 flex flex-col items-start md:items-start">
+                                    <h3 className="text-[1.35rem] md:text-[1.7rem] font-bold text-[#0B1528] dark:text-white leading-tight mb-1">
+                                        Bagong Silang Elementary School
+                                    </h3>
+                                    <div className="flex items-center justify-start gap-1.5 text-gray-500 dark:text-gray-400 text-[15px]">
+                                        <MapPin className="w-4 h-4 shrink-0" />
+                                        <span>Elementary</span>
+                                    </div>
+                                </div>
+
+                                {/* Meta: Left for Desktop */}
+                                <div className="order-2 md:order-1 w-full md:w-1/2 md:pr-12 md:text-right pl-16 md:pl-0 mt-4 md:mt-0 z-10 flex flex-col items-start md:items-end md:pt-1">
+                                    <div className="inline-flex items-center">
+                                        <span className="px-3 md:px-4 py-1.5 rounded-full bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-gray-400 text-[11px] md:text-xs font-bold tracking-widest uppercase">
+                                            2010 - 2016
+                                        </span>
+                                    </div>
+                                    <span className="text-[11px] font-bold text-gray-400 tracking-[0.2em] uppercase mt-2 md:mr-2">
+                                        ELEMENTARY
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
+
+            {/* Section Divider */}
+            <div className="w-full h-px bg-linear-to-r from-transparent via-sky-primary/20 to-transparent"></div>
+
+            {/* Skills Section */}
+            <section
+                id="skills"
+                ref={skillsRef}
+                className={`relative py-40 bg-transparent transition-colors duration-300 reveal ${
+                    skillsIsVisible ? "visible" : ""
+                }`}
+            >
+                {/* Subtle background decoration */}
+                <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                    <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-sky-100 dark:bg-sky-900/10 rounded-full blur-3xl opacity-30"></div>
+                    <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-100 dark:bg-blue-900/10 rounded-full blur-3xl opacity-30"></div>
+                </div>
+
+                <div className="relative max-w-7xl mx-auto px-6">
+                    {/* Beautiful header */}
+                    <div className="text-center mb-10 flex flex-col items-center">
+                        <div className="inline-flex items-center gap-3 mb-3">
+                            <span className="text-xl md:text-xl font-bold text-sky-primary tracking-[0.2em] uppercase">
+                                Skills
+                            </span>
+                        </div>
+                        <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white tracking-tight">
+                            Tech Stack
+                        </h2>
+                        <p className="text-gray-500 dark:text-gray-400 text-lg mt-4 max-w-2xl mx-auto">
+                            The array of tools and frameworks I use to bring
+                            ideas to life.
+                        </p>
+                    </div>
+
+                    <CategoryToggle
+                        categories={categories}
+                        activeCategory={activeCategory}
+                        onCategoryChange={setActiveCategory}
+                    />
+
+                    {/* Beautiful grid with better spacing */}
+                    <div
+                        key={activeCategory}
+                        className="animate-fade-in-up"
+                        style={{ animationDuration: "0.4s" }}
+                    >
+                        {activeCategory === "development" ? (
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
+                                {/* Back-end Card */}
+                                <div className="bg-white dark:bg-[#111111]/80 backdrop-blur-md rounded-[2.5rem] p-10 lg:p-12 shadow-xl dark:shadow-2xl shadow-gray-200/50 dark:shadow-black/40 border border-gray-100 dark:border-white/5 flex flex-col h-full group hover:border-sky-500/30 transition-all duration-300">
+                                    <h3 className="text-3xl font-extrabold text-gray-900 dark:text-white mb-2 tracking-tight">
+                                        Back-end Development
+                                    </h3>
+                                    <p className="text-gray-400 dark:text-gray-500 font-medium mb-6">
+                                        Powering the engine behind the scenes
+                                    </p>
+                                    <p className="text-gray-500 dark:text-gray-400 italic text-sm mb-10 leading-relaxed max-w-sm">
+                                        Building robust, scalable server-side
+                                        applications and managing data
+                                        efficiently.
+                                    </p>
+                                    <div className="flex flex-col gap-6 mt-auto">
+                                        {getCurrentSkills()
+                                            .filter(
+                                                (skill) =>
+                                                    skill.type === "backend",
+                                            )
+                                            .map((skill) => (
+                                                <div
+                                                    key={`backend-${skill.name}`}
+                                                    className="flex items-center gap-5 group/skill"
+                                                >
+                                                    <img
+                                                        src={skill.logo}
+                                                        alt={skill.name}
+                                                        className="w-8 h-8 object-contain group-hover/skill:scale-110 transition-transform duration-300 shrink-0"
+                                                    />
+                                                    <span className="text-gray-700 dark:text-gray-300 font-semibold text-lg">
+                                                        {skill.name}
+                                                    </span>
+                                                </div>
+                                            ))}
+                                    </div>
+                                </div>
+
+                                {/* Front-end Card */}
+                                <div className="bg-white dark:bg-[#111111]/80 backdrop-blur-md rounded-[2.5rem] p-10 lg:p-12 shadow-xl dark:shadow-2xl shadow-gray-200/50 dark:shadow-black/40 border border-gray-100 dark:border-white/5 flex flex-col h-full group hover:border-sky-500/30 transition-all duration-300">
+                                    <h3 className="text-3xl font-extrabold text-gray-900 dark:text-white mb-2 tracking-tight">
+                                        Front-end Development
+                                    </h3>
+                                    <p className="text-gray-400 dark:text-gray-500 font-medium mb-6">
+                                        Crafting beautiful interactive
+                                        interfaces
+                                    </p>
+                                    <p className="text-gray-500 dark:text-gray-400 italic text-sm mb-10 leading-relaxed max-w-sm">
+                                        Translating designs into responsive,
+                                        high-performance user experiences.
+                                    </p>
+                                    <div className="flex flex-col gap-6 mt-auto">
+                                        {getCurrentSkills()
+                                            .filter(
+                                                (skill) =>
+                                                    skill.type === "frontend",
+                                            )
+                                            .map((skill) => (
+                                                <div
+                                                    key={`frontend-${skill.name}`}
+                                                    className="flex items-center gap-5 group/skill"
+                                                >
+                                                    <img
+                                                        src={skill.logo}
+                                                        alt={skill.name}
+                                                        className="w-8 h-8 object-contain group-hover/skill:scale-110 transition-transform duration-300 shrink-0"
+                                                    />
+                                                    <span className="text-gray-700 dark:text-gray-300 font-semibold text-lg">
+                                                        {skill.name}
+                                                    </span>
+                                                </div>
+                                            ))}
+                                    </div>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
+                                {/* UI/UX Card */}
+                                <div className="bg-white dark:bg-[#111111]/80 backdrop-blur-md rounded-[2.5rem] p-10 lg:p-12 shadow-xl dark:shadow-2xl shadow-gray-200/50 dark:shadow-black/40 border border-gray-100 dark:border-white/5 flex flex-col h-full group hover:border-sky-500/30 transition-all duration-300">
+                                    <h3 className="text-3xl font-extrabold text-gray-900 dark:text-white mb-2 tracking-tight">
+                                        UI/UX Design
+                                    </h3>
+                                    <p className="text-gray-400 dark:text-gray-500 font-medium mb-6">
+                                        User-centric experiences
+                                    </p>
+                                    <p className="text-gray-500 dark:text-gray-400 italic text-sm mb-10 leading-relaxed">
+                                        Focusing on intuitive flows, elegant
+                                        visuals, and pixel-perfect attention to
+                                        detail.
+                                    </p>
+                                    <div className="flex flex-col gap-6 mt-auto">
+                                        {getCurrentSkills()
+                                            .filter(
+                                                (skill) => skill.type === "ui",
+                                            )
+                                            .map((skill) => (
+                                                <div
+                                                    key={`ui-${skill.name}`}
+                                                    className="flex items-center gap-5 group/skill"
+                                                >
+                                                    <img
+                                                        src={skill.logo}
+                                                        alt={skill.name}
+                                                        className="w-8 h-8 object-contain group-hover/skill:scale-110 transition-transform duration-300 shrink-0"
+                                                    />
+                                                    <span className="text-gray-700 dark:text-gray-300 font-semibold text-lg">
+                                                        {skill.name}
+                                                    </span>
+                                                </div>
+                                            ))}
+                                    </div>
+                                </div>
+
+                                {/* Tools Card */}
+                                <div className="bg-white dark:bg-[#111111]/80 backdrop-blur-md rounded-[2.5rem] p-10 lg:p-12 shadow-xl dark:shadow-2xl shadow-gray-200/50 dark:shadow-black/40 border border-gray-100 dark:border-white/5 flex flex-col h-full group hover:border-sky-500/30 transition-all duration-300">
+                                    <h3 className="text-3xl font-extrabold text-gray-900 dark:text-white mb-2 tracking-tight">
+                                        Tools
+                                    </h3>
+                                    <p className="text-gray-400 dark:text-gray-500 font-medium mb-6">
+                                        My workflow essentials
+                                    </p>
+                                    <p className="text-gray-500 dark:text-gray-400 italic text-sm mb-10 leading-relaxed">
+                                        Version control, editors, and modern
+                                        utilities that boost daily productivity.
+                                    </p>
+                                    <div className="flex flex-col gap-6 mt-auto">
+                                        {getCurrentSkills()
+                                            .filter(
+                                                (skill) =>
+                                                    skill.type === "tool" ||
+                                                    skill.type === "repository",
+                                            )
+                                            .map((skill) => (
+                                                <div
+                                                    key={`tool-${skill.name}`}
+                                                    className="flex items-center gap-5 group/skill"
+                                                >
+                                                    <img
+                                                        src={skill.logo}
+                                                        alt={skill.name}
+                                                        className="w-8 h-8 object-contain group-hover/skill:scale-110 transition-transform duration-300 shrink-0"
+                                                    />
+                                                    <span className="text-gray-700 dark:text-gray-300 font-semibold text-lg">
+                                                        {skill.name}
+                                                    </span>
+                                                </div>
+                                            ))}
+                                    </div>
+                                </div>
+
+                                {/* Deployment Card */}
+                                <div className="bg-white dark:bg-[#111111]/80 backdrop-blur-md rounded-[2.5rem] p-10 lg:p-12 shadow-xl dark:shadow-2xl shadow-gray-200/50 dark:shadow-black/40 border border-gray-100 dark:border-white/5 flex flex-col h-full group hover:border-sky-500/30 transition-all duration-300">
+                                    <h3 className="text-3xl font-extrabold text-gray-900 dark:text-white mb-2 tracking-tight">
+                                        Deployment
+                                    </h3>
+                                    <p className="text-gray-400 dark:text-gray-500 font-medium mb-6">
+                                        Shipping code to production
+                                    </p>
+                                    <p className="text-gray-500 dark:text-gray-400 italic text-sm mb-10 leading-relaxed">
+                                        Platforms and services used to host,
+                                        scale, and deliver applications
+                                        globally.
+                                    </p>
+                                    <div className="flex flex-col gap-6 mt-auto">
+                                        {getCurrentSkills()
+                                            .filter(
+                                                (skill) =>
+                                                    skill.type === "deployment",
+                                            )
+                                            .map((skill) => (
+                                                <div
+                                                    key={`dep-${skill.name}`}
+                                                    className="flex items-center gap-5 group/skill"
+                                                >
+                                                    <img
+                                                        src={skill.logo}
+                                                        alt={skill.name}
+                                                        className="w-8 h-8 object-contain group-hover/skill:scale-110 transition-transform duration-300 shrink-0"
+                                                    />
+                                                    <span className="text-gray-700 dark:text-gray-300 font-semibold text-lg">
+                                                        {skill.name}
+                                                    </span>
+                                                </div>
+                                            ))}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </section>
+
+            {/* Section Divider */}
+            <div className="w-full h-px bg-linear-to-r from-transparent via-sky-primary/20 to-transparent"></div>
+
+            {/* Projects Section */}
+            <section
+                id="projects"
+                ref={projectsRef}
+                className={`relative py-40 bg-transparent transition-colors duration-300 reveal ${
+                    projectsIsVisible ? "visible" : ""
+                }`}
+            >
+                <div className="max-w-7xl mx-auto px-6">
+                    <div className="text-center mb-20 flex flex-col items-center">
+                        <div className="inline-flex items-center gap-3 mb-4">
+                            <span className="text-xl md:text-xl font-bold text-sky-primary tracking-[0.2em] uppercase">
+                                Projects
+                            </span>
+                        </div>
+                        <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white tracking-tight mb-5">
+                            Featured Projects
+                        </h2>
+                        <p className="text-gray-500 dark:text-gray-400 text-lg max-w-2xl">
+                            Some of the recent work I've built. Hover over any
+                            project to reveal its details.
+                        </p>
+                    </div>
+
+                    {/* Stacked Full-Width Project Cards */}
+                    <div className="flex flex-col gap-8">
+                        {projects.map((project, index) => {
+                            const progressColor = project.progress === 100
+                                ? "bg-emerald-500"
+                                : project.progress >= 60
+                                ? "bg-amber-500"
+                                : project.progress >= 30
+                                ? "bg-orange-500"
+                                : "bg-red-500";
+
+                            const statusColor = project.status === "Finished"
+                                ? "text-emerald-600 dark:text-emerald-400 bg-emerald-50/90 dark:bg-emerald-500/20 border-emerald-200/50 dark:border-emerald-500/30"
+                                : project.status === "In Progress"
+                                ? "text-amber-600 dark:text-amber-400 bg-amber-50/90 dark:bg-amber-500/20 border-amber-200/50 dark:border-amber-500/30"
+                                : "text-red-600 dark:text-red-400 bg-red-50/90 dark:bg-red-500/20 border-red-200/50 dark:border-red-500/30";
+
+                            const dotColor = project.status === "Finished"
+                                ? "bg-emerald-500"
+                                : project.status === "In Progress"
+                                ? "bg-amber-500 animate-pulse"
+                                : "bg-red-500 animate-pulse";
+
+                            const animClass = projectsIsVisible
+                                ? (index % 2 === 0 ? 'animate-slide-in-left' : 'animate-slide-in-right')
+                                : 'opacity-0';
+
+                            return (
+                                <div
+                                    key={index}
+                                    className={`bg-white/60 dark:bg-[#111111]/60 backdrop-blur-md border border-gray-100 dark:border-white/5 rounded-4xl overflow-hidden shadow-lg dark:shadow-2xl hover:shadow-xl hover:border-sky-500/20 transition-all duration-500 group ${animClass}`}
+                                    style={{ animationDelay: `${index * 150}ms`, animationFillMode: 'both' }}
+                                >
+                                    <div className={`flex flex-col ${index % 2 === 0 ? 'lg:flex-row' : 'lg:flex-row-reverse'}`}>
+                                        {/* Image Side with Status Badge overlay */}
+                                        <div className="relative lg:w-1/2 h-64 lg:h-auto min-h-[320px] overflow-hidden">
+                                            <img
+                                                src={project.image}
+                                                alt={project.title}
+                                                className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 ease-out group-hover:scale-110"
+                                            />
+                                            {/* Status badge inside image — top-left with frosted glass */}
+                                            <div className="absolute top-4 left-4 z-20">
+                                                <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full border backdrop-blur-md text-xs font-bold uppercase tracking-widest shadow-lg ${statusColor}`}>
+                                                    <div className={`w-1.5 h-1.5 rounded-full ${dotColor}`}></div>
+                                                    {project.status}
+                                                </div>
+                                            </div>
+                                            {/* Hover Blur Overlay */}
+                                            <div className="absolute inset-0 bg-black/60 backdrop-blur-lg opacity-0 group-hover:opacity-100 transition-all duration-500 flex flex-col justify-center items-center p-8 text-center z-10">
+                                                <p className="text-white/90 text-sm leading-relaxed max-w-sm transform translate-y-4 group-hover:translate-y-0 transition-transform duration-700 ease-out">
+                                                    {project.desc}
+                                                </p>
+                                                <button className="mt-6 px-6 py-2.5 bg-white/10 hover:bg-white/20 border border-white/20 backdrop-blur-md text-white font-bold text-sm rounded-full transform translate-y-4 group-hover:translate-y-0 transition-all duration-700 delay-100 flex items-center gap-2 group/btn">
+                                                    View Details
+                                                    <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        {/* Content Side */}
+                                        <div className="flex flex-col justify-between p-8 lg:p-10 lg:w-1/2">
+                                            {/* Title */}
+                                            <div>
+                                                <h3 className="text-2xl lg:text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight mb-4 group-hover:text-sky-500 transition-colors duration-300">
+                                                    {project.title}
+                                                </h3>
+                                                <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed mb-8 line-clamp-2 lg:line-clamp-3">
+                                                    {project.desc}
+                                                </p>
+                                            </div>
+
+                                            {/* Tech Tags */}
+                                            <div className="flex items-center gap-3 mb-8 flex-wrap">
+                                                {project.tags.map((tag, tagIndex) => (
+                                                    <div
+                                                        key={tagIndex}
+                                                        className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-full"
+                                                    >
+                                                        <img
+                                                            src={tag.logo}
+                                                            alt={tag.name}
+                                                            className="w-4 h-4 object-contain"
+                                                        />
+                                                        <span className="text-xs font-semibold text-gray-600 dark:text-gray-300">
+                                                            {tag.name}
+                                                        </span>
+                                                    </div>
+                                                ))}
+                                            </div>
+
+                                            {/* Progress Bar */}
+                                            <div>
+                                                <div className="flex items-center justify-between mb-2">
+                                                    <span className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">
+                                                        Progress
+                                                    </span>
+                                                    <span className="text-sm font-extrabold text-gray-900 dark:text-white">
+                                                        {project.progress}%
+                                                    </span>
+                                                </div>
+                                                <div className="w-full bg-gray-200 dark:bg-white/10 rounded-full h-2 overflow-hidden">
+                                                    <div
+                                                        className={`h-full rounded-full ${progressColor} transition-all duration-1000 ease-out`}
+                                                        style={{
+                                                            width: `${project.progress}%`,
+                                                        }}
+                                                    ></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+
+                    <div className="text-center mt-16">
+                        <a
+                            href="https://github.com/kylleedriangalceran-ops?tab=repositories"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 bg-sky-primary hover:bg-sky-600 text-white font-semibold py-4 px-8 rounded-full transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+                        >
+                            View More Projects
+                            <ArrowRight className="w-5 h-5" />
+                        </a>
+                    </div>
+                </div>
+            </section>
+            {/* Section Divider */}
+            <div className="w-full h-px bg-linear-to-r from-transparent via-sky-primary/20 to-transparent"></div>
+
+            {/* Footer Contact Section */}
+            <footer
+                id="contact"
+                className="relative overflow-hidden bg-transparent"
+            >
+                <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-gray-200 dark:via-gray-700 to-transparent"></div>
+
+                <div className="relative max-w-5xl mx-auto px-6 py-24">
+                    <div className="text-center mb-16 flex flex-col items-center">
+                        <div className="inline-flex items-center gap-3 mb-4">
+                            <span className="text-xl md:text-2xl font-bold text-sky-primary tracking-[0.2em] uppercase">
+                                Contact
+                            </span>
+                        </div>
+                        <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white tracking-tight">
+                            Let's Work Together!
+                        </h2>
+                    </div>
+
+                    <div className="max-w-2xl mx-auto mb-20">
+                        <ContactForm />
+                    </div>
+
+                    <div className="max-w-3xl mx-auto">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+                            <a
+                                href="mailto:kylleedrian71@gmail.com"
+                                className="group flex items-center gap-4 p-5 rounded-2xl bg-white/90 dark:bg-[#111111]/80 backdrop-blur-md border border-sky-100/50 dark:border-sky-900/20 hover:border-sky-primary transition-all duration-300 shadow-sm shadow-sky-100/50 dark:shadow-none"
+                            >
+                                <div className="w-12 h-12 rounded-full bg-sky-primary/10 dark:bg-sky-primary/20 flex items-center justify-center shrink-0 group-hover:bg-sky-primary/20 dark:group-hover:bg-sky-primary/30 transition-colors">
+                                    <Mail
+                                        className="w-5 h-5 text-sky-primary"
+                                        strokeWidth={1.5}
+                                    />
+                                </div>
+                                <div>
+                                    <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
+                                        Email
+                                    </p>
+                                    <p className="text-sm font-medium text-gray-900 dark:text-white">
+                                        kylleedrian71@gmail.com
+                                    </p>
+                                </div>
+                            </a>
+
+                            <a
+                                href="tel:09454416649"
+                                className="group flex items-center gap-4 p-5 rounded-2xl bg-white/90 dark:bg-[#111111]/80 backdrop-blur-md border border-sky-100/50 dark:border-sky-900/20 hover:border-sky-primary transition-all duration-300 shadow-sm shadow-sky-100/50 dark:shadow-none"
+                            >
+                                <div className="w-12 h-12 rounded-full bg-sky-primary/10 dark:bg-sky-primary/20 flex items-center justify-center shrink-0 group-hover:bg-sky-primary/20 dark:group-hover:bg-sky-primary/30 transition-colors">
+                                    <Phone
+                                        className="w-5 h-5 text-sky-primary"
+                                        strokeWidth={1.5}
+                                    />
+                                </div>
+                                <div>
+                                    <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
+                                        Phone
+                                    </p>
+                                    <p className="text-sm font-medium text-gray-900 dark:text-white">
+                                        0945 441 6649
+                                    </p>
+                                </div>
+                            </a>
+                        </div>
+                        <div className="text-center mb-12">
+                            <p className="text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-6">
+                                Connect With Me
+                            </p>
+                            <div className="flex items-center justify-center gap-4">
+                                <a
+                                    href="https://github.com/Kyllee-Galceran"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="w-11 h-11 rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 flex items-center justify-center text-gray-600 dark:text-gray-400 hover:border-sky-primary hover:text-sky-primary dark:hover:border-sky-primary dark:hover:text-sky-primary transition-all duration-300"
+                                >
+                                    <Github
+                                        className="w-5 h-5"
+                                        strokeWidth={1.5}
+                                    />
+                                </a>
+                                <a
+                                    href="https://www.linkedin.com/in/kylle-edrian-galceran-7835162b7/"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="w-11 h-11 rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 flex items-center justify-center text-gray-600 dark:text-gray-400 hover:border-sky-primary hover:text-sky-primary dark:hover:border-sky-primary dark:hover:text-sky-primary transition-all duration-300"
+                                >
+                                    <Linkedin
+                                        className="w-5 h-5"
+                                        strokeWidth={1.5}
+                                    />
+                                </a>
+                                <a
+                                    href="https://www.facebook.com/kylle.edrian.9/"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="w-11 h-11 rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 flex items-center justify-center text-gray-600 dark:text-gray-400 hover:border-sky-primary hover:text-sky-primary dark:hover:border-sky-primary dark:hover:text-sky-primary transition-all duration-300"
+                                >
+                                    <Facebook
+                                        className="w-5 h-5"
+                                        strokeWidth={1.5}
+                                    />
+                                </a>
+                                <a
+                                    href="https://www.instagram.com/kyyyllee_/"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="w-11 h-11 rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 flex items-center justify-center text-gray-600 dark:text-gray-400 hover:border-sky-primary hover:text-sky-primary dark:hover:border-sky-primary dark:hover:text-sky-primary transition-all duration-300"
+                                >
+                                    <Instagram
+                                        className="w-5 h-5"
+                                        strokeWidth={1.5}
+                                    />
+                                </a>
+                            </div>
+                        </div>
+
+                        <div className="w-full h-px bg-gradient-to-r from-transparent via-gray-200 dark:via-gray-700 to-transparent mb-8"></div>
+
+                        <div className="text-center">
+                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                                &copy; {new Date().getFullYear()}{" "}
+                                <a
+                                    href="#"
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        window.scrollTo({
+                                            top: 0,
+                                            behavior: "smooth",
+                                        });
+                                    }}
+                                    className="font-semibold text-sky-primary hover:text-sky-600 transition-colors"
+                                >
+                                    KE Galceran
+                                </a>
+                                . Crafted with passion.
+                            </p>
+                            <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">
+                                <a
+                                    href="/admin/dashboard"
+                                    className="hover:text-sky-primary transition-colors"
+                                >
+                                    Admin
+                                </a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </footer>
         </Layout>
     );
 }

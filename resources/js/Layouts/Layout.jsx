@@ -1,22 +1,39 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from '@inertiajs/react';
-import useDarkMode from '../Hooks/useDarkMode';
-import { GooeyToaster } from 'goey-toast';
-import 'goey-toast/styles.css';
+import React, { useState, useEffect } from "react";
+import { Link } from "@inertiajs/react";
+import useDarkMode from "../Hooks/useDarkMode";
+import { GooeyToaster } from "goey-toast";
+import "goey-toast/styles.css";
+import { Sun, Moon, ArrowUp } from "lucide-react";
 
 export default function Layout({ children }) {
     const [darkMode, toggleDarkMode] = useDarkMode();
     const [showScrollTop, setShowScrollTop] = useState(false);
+    const [activeLink, setActiveLink] = useState("");
+    const [isLoading, setIsLoading] = useState(true);
+    const [fadeOut, setFadeOut] = useState(false);
+
+    useEffect(() => {
+        const fadeTimer = setTimeout(() => setFadeOut(true), 1800);
+        const removeTimer = setTimeout(() => setIsLoading(false), 2400);
+        return () => {
+            clearTimeout(fadeTimer);
+            clearTimeout(removeTimer);
+        };
+    }, []);
 
     useEffect(() => {
         // Force scroll to top on page load/refresh
-        if ('scrollRestoration' in window.history) {
-            window.history.scrollRestoration = 'manual';
+        if ("scrollRestoration" in window.history) {
+            window.history.scrollRestoration = "manual";
         }
 
         // Remove hash from the URL initially so the browser doesn't jump to a section
         if (window.location.hash) {
-            window.history.replaceState(null, '', window.location.pathname + window.location.search);
+            window.history.replaceState(
+                null,
+                "",
+                window.location.pathname + window.location.search,
+            );
         }
 
         const forceTop = () => window.scrollTo(0, 0);
@@ -26,76 +43,176 @@ export default function Layout({ children }) {
 
         const handleScroll = () => {
             setShowScrollTop(window.scrollY > 300);
+
+            // Determine active section for nav highlighting
+            const sections = ["about", "skills", "projects", "contact"];
+            let current = "";
+            for (const section of sections) {
+                const el = document.getElementById(section);
+                if (el) {
+                    const rect = el.getBoundingClientRect();
+                    if (rect.top <= 150 && rect.bottom >= 150) {
+                        current = section;
+                    }
+                }
+            }
+            if (current && window.scrollY > 100) {
+                setActiveLink(current);
+            } else if (window.scrollY <= 100) {
+                setActiveLink("");
+            }
         };
-        window.addEventListener('scroll', handleScroll);
-        return () => window.removeEventListener('scroll', handleScroll);
+        window.addEventListener("scroll", handleScroll);
+        return () => window.removeEventListener("scroll", handleScroll);
     }, []);
 
     const scrollToTop = () => {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        window.scrollTo({ top: 0, behavior: "smooth" });
     };
 
     const scrollToSection = (e, id) => {
         // Only prevent default and scroll if we are on the home page with these sections
-        if (window.location.pathname === '/' || window.location.pathname === '') {
+        if (
+            window.location.pathname === "/" ||
+            window.location.pathname === ""
+        ) {
             e.preventDefault();
-            document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+            document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
         }
     };
 
     return (
-        <div className="min-h-screen bg-transparent text-[#1b1b18] dark:text-[#EDEDEC] font-sans selection:bg-[var(--color-sky-primary)] selection:text-white pb-12 transition-colors duration-300 relative">
-            {/* Global Background Image */}
-            <div className="fixed inset-0 -z-20 bg-[url('/images/backgrounds/download.png')] bg-cover bg-center bg-no-repeat pointer-events-none"></div>
-            {/* Dark mode overlay */}
-            <div className="fixed inset-0 -z-10 hidden dark:block bg-[#0a0a0a]/90 pointer-events-none transition-colors duration-300"></div>
-            {/* Sticky Navbar */}
-            <nav className="sticky top-0 z-40 bg-[#FDFDFC]/80 dark:bg-[#0a0a0a]/80 backdrop-blur-md border-b border-gray-100 dark:border-[#3E3E3A]">
-                <div className="w-full max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
+        <div className="min-h-screen bg-transparent dark:bg-[#111111] text-gray-900 dark:text-[#EDEDEC] font-sans selection:bg-sky-primary selection:text-white pb-12 transition-colors duration-500 relative">
+            {/* Loading Screen */}
+            {isLoading && (
+                <div className={`fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#FDFDFC] dark:bg-[#0a0a0a] transition-opacity duration-600 ease-out ${fadeOut ? "opacity-0" : "opacity-100"}`}>
+                    <style>{`
+                        @keyframes logoBreath {
+                            0%, 100% { transform: scale(1); opacity: 0.9; }
+                            50% { transform: scale(1.05); opacity: 1; }
+                        }
+                        @keyframes ringExpand {
+                            0% { transform: scale(0.8); opacity: 0.6; }
+                            50% { transform: scale(1.15); opacity: 0; }
+                            100% { transform: scale(0.8); opacity: 0.6; }
+                        }
+                        @keyframes shimmer {
+                            0% { background-position: -200% center; }
+                            100% { background-position: 200% center; }
+                        }
+                    `}</style>
+                    <div className="relative flex items-center justify-center">
+                        {/* Outer ring pulse */}
+                        <div
+                            className="absolute w-32 h-32 rounded-full border-2 border-sky-500/30"
+                            style={{ animation: "ringExpand 2s ease-in-out infinite" }}
+                        ></div>
+                        {/* Inner glow */}
+                        <div className="absolute w-20 h-20 rounded-full bg-sky-500/10 blur-xl"></div>
+                        {/* Logo */}
+                        <img
+                            src="/images/logos/khael-logo.png"
+                            alt="Loading"
+                            className="w-16 h-auto relative z-10 dark:brightness-0 dark:invert"
+                            style={{ animation: "logoBreath 2s ease-in-out infinite" }}
+                        />
+                    </div>
+                    {/* Shimmer text */}
+                    <p
+                        className="mt-8 text-sm font-bold tracking-[0.3em] uppercase"
+                        style={{
+                            background: "linear-gradient(90deg, #9ca3af 25%, #7EC8E3 50%, #9ca3af 75%)",
+                            backgroundSize: "200% auto",
+                            WebkitBackgroundClip: "text",
+                            WebkitTextFillColor: "transparent",
+                            animation: "shimmer 2s linear infinite",
+                        }}
+                    >
+                        Loading
+                    </p>
+                </div>
+            )}
+
+            {/* Global Background - Original Undisturbed */}
+            <div className="fixed inset-0 -z-20 pointer-events-none overflow-hidden">
+                <div
+                    className="absolute inset-0 bg-fixed bg-cover bg-center bg-no-repeat"
+                    style={{
+                        backgroundImage: `url('/images/backgrounds/download.png')`,
+                    }}
+                ></div>
+            </div>
+            {/* Sticky Frostbite Navbar */}
+            <nav className="sticky top-0 z-40 bg-white/60 dark:bg-[#111111]/70 backdrop-blur-2xl border-b border-gray-200/50 dark:border-white/5 shadow-[0_4px_30px_rgba(0,0,0,0.03)] dark:shadow-[0_4px_30px_rgba(0,0,0,0.1)] transition-all duration-300">
+                <div className="w-full max-w-5xl mx-auto px-6 h-[72px] flex items-center justify-between">
                     <Link href="/" className="flex items-center">
-                        <img src="/images/logos/khael-logo.svg" alt="Kylle" className="h-8 w-auto" />
+                        <img
+                            src="/images/logos/khael-logo.png"
+                            alt="Kylle"
+                            className="h-10 md:h-12 w-auto dark:brightness-0 dark:invert opacity-90 hover:opacity-100 transition-opacity"
+                        />
                     </Link>
 
-                    <div className="hidden md:flex items-center space-x-8 text-sm font-medium">
-                        <Link href="#about" onClick={(e) => scrollToSection(e, 'about')} className="text-gray-600 dark:text-gray-300 hover:text-[var(--color-sky-primary)] dark:hover:text-[var(--color-sky-primary)] transition-colors">About</Link>
-                        <Link href="#skills" onClick={(e) => scrollToSection(e, 'skills')} className="text-gray-600 dark:text-gray-300 hover:text-[var(--color-sky-primary)] dark:hover:text-[var(--color-sky-primary)] transition-colors">Skills</Link>
-                        <Link href="#projects" onClick={(e) => scrollToSection(e, 'projects')} className="text-gray-600 dark:text-gray-300 hover:text-[var(--color-sky-primary)] dark:hover:text-[var(--color-sky-primary)] transition-colors">Projects</Link>
-                        <Link href="#contact" onClick={(e) => scrollToSection(e, 'contact')} className="text-gray-600 dark:text-gray-300 hover:text-[var(--color-sky-primary)] dark:hover:text-[var(--color-sky-primary)] transition-colors">Contact</Link>
+                    <div className="hidden md:flex items-center space-x-2">
+                        <div className="flex items-center space-x-1">
+                            {[
+                                { name: "About", id: "about" },
+                                { name: "Skills", id: "skills" },
+                                { name: "Projects", id: "projects" },
+                                { name: "Contact", id: "contact" },
+                            ].map((item) => (
+                                <Link
+                                    key={item.name}
+                                    href={`#${item.id}`}
+                                    onClick={(e) => {
+                                        scrollToSection(e, item.id);
+                                        setActiveLink(item.id);
+                                    }}
+                                    className={`relative px-4 py-2 text-sm font-semibold rounded-full transition-all duration-300 group ${
+                                        activeLink === item.id
+                                            ? "text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-500/10"
+                                            : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100/60 dark:hover:bg-white/5"
+                                    }`}
+                                >
+                                    {activeLink === item.id && (
+                                        <span className="absolute -top-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-sky-500 dark:bg-sky-400"></span>
+                                    )}
+                                    {item.name}
+                                </Link>
+                            ))}
+                        </div>
 
                         {/* Dark Mode Toggle */}
-                        <button onClick={toggleDarkMode} className="p-2 text-gray-400 hover:text-white rounded-full transition-colors ml-4 focus:outline-none focus:ring-2 focus:ring-[var(--color-sky-light)]">
-                            {darkMode ? (
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
-                                </svg>
-                            ) : (
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                                  <path strokeLinecap="round" strokeLinejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
-                                </svg>
-                            )}
-                        </button>
+                        <div className="flex items-center pl-2 ml-2 border-l border-gray-200 dark:border-white/10">
+                            <button
+                                onClick={toggleDarkMode}
+                                className="flex items-center justify-center p-2 rounded-full text-gray-500 hover:text-sky-500 dark:text-gray-400 dark:hover:text-sky-400 transition-colors focus:outline-none"
+                            >
+                                {darkMode ? (
+                                    <Sun className="w-5 h-5" />
+                                ) : (
+                                    <Moon className="w-5 h-5" />
+                                )}
+                            </button>
+                        </div>
                     </div>
                 </div>
             </nav>
 
             {/* Main Content */}
-            <main>
-                {children}
-            </main>
+            <main>{children}</main>
 
             {/* Scroll to Top Button */}
             <button
                 onClick={scrollToTop}
-                className={`fixed bottom-8 right-8 z-50 w-12 h-12 rounded-full bg-[var(--color-sky-primary)] hover:bg-[var(--color-sky-hover)] text-white shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-300 cursor-pointer ${showScrollTop ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`}
+                className={`fixed bottom-8 right-8 z-50 w-12 h-12 rounded-full bg-sky-primary hover:bg-sky-hover text-white shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-300 cursor-pointer ${showScrollTop ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"}`}
                 aria-label="Scroll to top"
             >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
-                </svg>
+                <ArrowUp className="w-5 h-5" strokeWidth={2.5} />
             </button>
 
             {/* Notification Toast Component */}
-            <GooeyToaster position="bottom-right" />
+            <GooeyToaster position="top-right" />
         </div>
     );
 }

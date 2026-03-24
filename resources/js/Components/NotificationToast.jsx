@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Sparkles, X } from 'lucide-react';
 
 export default function NotificationToast() {
     const [isVisible, setIsVisible] = useState(false);
@@ -47,7 +48,9 @@ export default function NotificationToast() {
             <div className="p-4">
                 <div className="flex justify-between items-start">
                     <div className="flex gap-3">
-                        <div className="text-xl">👋</div>
+                        <div className="text-sky-primary">
+                            <Sparkles className="w-5 h-5" />
+                        </div>
                         <div>
                             <h4 className="font-semibold text-sm text-gray-900 dark:text-gray-100">
                                 {isExpanded ? 'Welcome to my Portfolio!' : 'Welcome!'}
@@ -67,9 +70,7 @@ export default function NotificationToast() {
                             }}
                             className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
                         >
-                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                            </svg>
+                            <X className="w-4 h-4" />
                         </button>
                     )}
                 </div>
@@ -79,7 +80,7 @@ export default function NotificationToast() {
             <div className="h-1 bg-gray-100 dark:bg-gray-800 w-full relative group">
                 {/* Visual indicator of the time running out */}
                 <div
-                    className="h-full bg-[var(--color-sky-primary)] left-0 top-0 transition-none"
+                    className="h-full bg-sky-primary left-0 top-0 transition-none"
                     style={{ width: `${progress}%` }}
                 ></div>
             </div>
