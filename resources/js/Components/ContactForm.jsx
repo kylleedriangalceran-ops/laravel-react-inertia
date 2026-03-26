@@ -3,7 +3,6 @@ import {
     Send,
     ChevronRight,
     ArrowLeft,
-    User,
     CheckCircle,
     XCircle,
     Info,
@@ -13,6 +12,15 @@ import {
     Image,
     X,
 } from "lucide-react";
+
+// Default person silhouette for the message sender
+const UserAvatar = () => (
+    <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+        <circle cx="20" cy="20" r="20" fill="rgb(14 165 233 / 0.12)" />
+        <circle cx="20" cy="15" r="7" fill="rgb(14 165 233 / 0.55)" />
+        <path d="M6 38c0-7.732 6.268-14 14-14s14 6.268 14 14" fill="rgb(14 165 233 / 0.45)" />
+    </svg>
+);
 import { gooeyToast } from "goey-toast";
 import { router } from "@inertiajs/react";
 import axios from "axios";
@@ -178,58 +186,51 @@ export default function ContactForm() {
     const getBotReply = (msg) => {
         const lower = msg.toLowerCase();
 
-        // Projects
+        if (lower.match(/^(hi|hello|hey|good morning|good afternoon|good evening|sup|yo)/)) {
+            return `Hey! I'm a simple assistant here while you compose your message. Ask me about Kylle's projects, skills, background, or whether he's open to work.`;
+        }
+
         if (lower.match(/project|built|made|portfolio|work|app|website|web app/)) {
-            return "Kylle has built several projects! His main ones are:\n\n• **Portfolio Website** — A modern personal portfolio built with Laravel, React, Inertia.js & TailwindCSS (100% complete).\n• **E-Commerce Platform** — A full-featured online store with payment integration, inventory management & admin dashboard (65% in progress).\n\nWould you like to know more about any specific project?";
+            return `Kylle's main projects so far:\n\nPortfolio Site — the one you're on right now, built with Laravel, React, and Inertia.js.\n\nEduGrade — a digital gradebook system built for Naawan Central School as his thesis. Laravel, Vue, and PostgreSQL.\n\nE-Commerce Platform — in progress at around 65%, with payment integration and an admin panel.\n\nAnything specific you want to know?`;
         }
 
-        // Skills / Tech
         if (lower.match(/skill|tech|stack|language|framework|tool|know|learn|code|program/)) {
-            return "Kylle's tech stack includes:\n\n**Front-End:** HTML, CSS, JavaScript, React, TailwindCSS\n**Back-End:** PHP, Laravel, Node.js\n**Tools:** Git, VS Code, Postman, Figma, Vercel, draw.io\n**Database:** PostgreSQL, MongoDB\n\nHe's always learning and expanding his skills!";
+            return `Front-end: HTML, CSS, JavaScript, React, Vue, TailwindCSS, Bootstrap.\n\nBack-end: Laravel, Node.js, PHP, Python, Django.\n\nDatabases: MySQL, PostgreSQL, MongoDB.\n\nTools: Git, Figma, VS Code, Postman, Vercel.\n\nHe's also working on TypeScript and Next.js right now.`;
         }
 
-        // Experience / Background
         if (lower.match(/experience|background|about|who|yourself|bio|story|age|old/)) {
-            return "Kylle is a 22-year-old fresh graduate and aspiring web developer. He's passionate about building clean, modern web applications and is currently looking for opportunities to grow, contribute to a great team, and deliver beautiful digital experiences!";
+            return `Kylle is 22 and just graduated with a BSIT from MSU Naawan. He got into web development during college and has been building things ever since — freelance work, a thesis project, and a few personal projects. He's currently looking for his first full-time role.`;
         }
 
-        // Hire / Work / Job
         if (lower.match(/hire|job|work together|collaborate|freelance|available|open|opportunity|employ/)) {
-            return "Yes, Kylle is currently open to opportunities! Whether it's a full-time role, freelance project, or collaboration — he'd love to hear about it. You can share the details here and he'll get back to you! 🚀";
+            return `He's open to it — full-time, freelance, or collaboration. Leave your details here and he'll get back to you directly.`;
         }
 
-        // Contact Info
         if (lower.match(/contact|email|reach|connect|social|github|linkedin/)) {
-            return "You can reach Kylle through:\n\n📧 **Email:** kylleedrian71@gmail.com\n💻 **GitHub:** github.com/kylleedriangalceran-ops\n\nOr just leave your message right here and he'll respond!";
+            return `Email: kylleedrian71@gmail.com\nGitHub: github.com/kylleedriangalceran-ops\n\nOr just finish sending your message here — he reads these.`;
         }
 
-        // Education
         if (lower.match(/education|school|college|university|degree|graduate|study|course/)) {
-            return "Kylle is a fresh graduate with a strong foundation in web development. He's been building projects throughout his academic journey and continues to learn through hands-on experience and self-study!";
+            return `He graduated from Mindanao State University at Naawan with a BSIT degree. He was on the Dean's List and led the development on his thesis — a real-world gradebook system for a school.`;
         }
 
-        // Hobbies
-        if (lower.match(/hobby|hobbies|fun|free time|interest|like to do|basketball|anime|music|game|movie/)) {
-            return "Outside of coding, Kylle enjoys:\n\n🏀 Basketball\n🎮 Playing mobile games\n🎵 Music\n📺 Anime & Movies\n\nA well-rounded dev with great taste! 😄";
+        if (lower.match(/hobby|hobbies|fun|free time|interest|basketball|anime|music|game|movie/)) {
+            return `Outside coding: basketball, mobile games, music, anime, and movies. He'd say a life outside work makes you a sharper developer.`;
         }
 
-        // Greeting
-        if (lower.match(/^(hi|hello|hey|good morning|good afternoon|good evening|sup|yo|what's up)/)) {
-            return `Hey there! 👋 Welcome! I'm Kylle's assistant bot. Feel free to ask me about his projects, skills, experience, or anything else. How can I help you today?`;
+        if (lower.match(/cert|certification|award|achievement/)) {
+            return `He has certifications in Responsive Web Design and JavaScript Algorithms from freeCodeCamp, a React course from Udemy, and was recognized for Best Capstone Project by his department.`;
         }
 
-        // Thanks
         if (lower.match(/thank|thanks|thx|appreciate|awesome|great|cool|nice/)) {
-            return "You're welcome! 😊 Is there anything else you'd like to know about Kylle? I'm happy to help!";
+            return `No problem. Anything else before you send your message?`;
         }
 
-        // Goodbye
-        if (lower.match(/bye|goodbye|see you|later|take care|gotta go/)) {
-            return "Thanks for chatting! Kylle will review your messages and get back to you soon. Have a great day! 👋";
+        if (lower.match(/bye|goodbye|see you|later|take care/)) {
+            return `Take care. Kylle will get back to you once he sees your message.`;
         }
 
-        // Default
-        return `Thanks for your message! I've noted that down for Kylle. He'll review it and get back to you at ${formData.email} as soon as possible. In the meantime, feel free to ask me about his projects, skills, or experience!`;
+        return `Noted. Kylle will see your message and reply to ${formData.email} as soon as he can. Feel free to ask me anything about his work or background while you're here.`;
     };
 
     const handleSendMessage = async () => {
@@ -545,11 +546,8 @@ export default function ContactForm() {
 
                                 {/* User Profile Icon */}
                                 {msg.type === "user" && (
-                                    <div className="w-8 h-8 rounded-full bg-sky-primary/10 flex items-center justify-center shrink-0 border-2 border-sky-primary/20">
-                                        <User
-                                            className="w-4 h-4 text-sky-primary"
-                                            strokeWidth={2}
-                                        />
+                                    <div className="w-8 h-8 rounded-full shrink-0 overflow-hidden border-2 border-sky-primary/20">
+                                        <UserAvatar />
                                     </div>
                                 )}
                             </div>

@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Head, router } from "@inertiajs/react";
-import { Mail, Send, Check, Clock, X, MessageSquare, Zap, Trash2, Paperclip, Image, FileText } from "lucide-react";
+import { Mail, Send, Check, Clock, X, MessageSquare, Zap, Trash2, Paperclip, Image, FileText, Search, Star, Users, TrendingUp, CalendarDays, BarChart2, Eye } from "lucide-react";
 import Layout from "../../Layouts/Layout";
 import { gooeyToast } from "goey-toast";
 import axios from "axios";
 
-export default function Dashboard({ messages: initialMessages, unreadCount: initialUnreadCount, cacheDriver = 'file' }) {
+export default function Dashboard({ messages: initialMessages, unreadCount: initialUnreadCount, cacheDriver = 'file', analytics = {} }) {
     const [messages, setMessages] = useState(initialMessages);
     const [selectedEmail, setSelectedEmail] = useState(null);
     const [replyText, setReplyText] = useState("");
@@ -14,8 +14,25 @@ export default function Dashboard({ messages: initialMessages, unreadCount: init
     const [replyAttachment, setReplyAttachment] = useState(null);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [deleteMessageId, setDeleteMessageId] = useState(null);
+    const [searchQuery, setSearchQuery] = useState("");
+    const [filterTab, setFilterTab] = useState("all");
+    const [starredEmails, setStarredEmails] = useState(() => {
+        try {
+            const saved = localStorage.getItem("admin_starred_convos");
+            return saved ? new Set(JSON.parse(saved)) : new Set();
+        } catch { return new Set(); }
+    });
     const fileInputRef = useRef(null);
     const chatEndRef = useRef(null);
+
+    const {
+        totalVisits = 0,
+        todayVisits = 0,
+        weeklyData = [],
+        avgRating = 0,
+        totalRatings = 0,
+        ratingBreakdown = {},
+    } = analytics;
 
     const previousMessagesRef = React.useRef(initialMessages);
 
@@ -51,7 +68,7 @@ export default function Dashboard({ messages: initialMessages, unreadCount: init
         // Poll for new messages using Inertia partial reloads
         const messageInterval = setInterval(() => {
             router.reload({
-                only: ['messages', 'unreadCount'],
+                only: ['messages', 'unreadCount', 'analytics'],
                 preserveState: true,
                 preserveScroll: true,
             });
@@ -90,6 +107,32 @@ export default function Dashboard({ messages: initialMessages, unreadCount: init
         });
         return Array.from(map.values()).sort((a, b) => b.latest_date - a.latest_date);
     }, [messages]);
+
+    const toggleStar = (email, e) => {
+        e.stopPropagation();
+        setStarredEmails(prev => {
+            const next = new Set(prev);
+            next.has(email) ? next.delete(email) : next.add(email);
+            localStorage.setItem("admin_starred_convos", JSON.stringify([...next]));
+            return next;
+        });
+    };
+
+    const filteredConversations = React.useMemo(() => {
+        let result = conversations;
+        if (searchQuery.trim()) {
+            const q = searchQuery.toLowerCase();
+            result = result.filter(c =>
+                c.name.toLowerCase().includes(q) ||
+                c.email.toLowerCase().includes(q) ||
+                c.messages.some(m => m.message.toLowerCase().includes(q))
+            );
+        }
+        if (filterTab === "unread") result = result.filter(c => !c.is_read);
+        if (filterTab === "starred") result = result.filter(c => starredEmails.has(c.email));
+        if (filterTab === "replied") result = result.filter(c => c.has_replied);
+        return result;
+    }, [conversations, searchQuery, filterTab, starredEmails]);
 
     const activeConversation = conversations.find(c => c.email === selectedEmail);
 
@@ -178,6 +221,16 @@ export default function Dashboard({ messages: initialMessages, unreadCount: init
                 gooeyToast.error("Error", { description: "Failed to delete.", duration: 2000 });
             });
     };
+
+    const todayCount = messages.filter(m => {
+        const d = new Date(m.created_at);
+        const now = new Date();
+        return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth() && d.getDate() === now.getDate();
+    }).length;
+
+    const responseRate = messages.length > 0
+        ? Math.round((messages.filter(m => m.admin_reply).length / messages.length) * 100)
+        : 0;
 
     const isImageFile = (path) => {
         if (!path) return false;
@@ -280,47 +333,119 @@ export default function Dashboard({ messages: initialMessages, unreadCount: init
                         </div>
                     </div>
 
-                    {/* Stats */}
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
-                        <div className="bg-white dark:bg-[#1a1a1a] rounded-3xl p-6 border border-gray-200 dark:border-white/10 shadow-sm flex items-center gap-4 transition-all hover:shadow-md">
-                            <div className="w-12 h-12 rounded-full bg-sky-primary/10 dark:bg-sky-500/20 flex items-center justify-center shrink-0 border border-sky-primary/20">
-                                <Mail className="w-5 h-5 text-sky-primary" strokeWidth={2} />
+                    {/* Analytics Overview */}
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                        {[
+                            { label: "Total Messages", value: messages.length, icon: Mail, bg: "bg-sky-primary/10 dark:bg-sky-500/20", border: "border-sky-primary/20", iconColor: "text-sky-primary" },
+                            { label: "Unread", value: unreadCount, icon: Clock, bg: "bg-orange-500/10 dark:bg-orange-500/20", border: "border-orange-500/20", iconColor: "text-orange-500" },
+                            { label: "Replied", value: messages.filter(m => m.admin_reply).length, icon: Check, bg: "bg-green-500/10 dark:bg-green-500/20", border: "border-green-500/20", iconColor: "text-green-500" },
+                            { label: "Conversations", value: conversations.length, icon: Users, bg: "bg-violet-500/10 dark:bg-violet-500/20", border: "border-violet-500/20", iconColor: "text-violet-500" },
+                            { label: "Response Rate", value: `${responseRate}%`, icon: TrendingUp, bg: "bg-emerald-500/10 dark:bg-emerald-500/20", border: "border-emerald-500/20", iconColor: "text-emerald-500" },
+                            { label: "Today", value: todayCount, icon: CalendarDays, bg: "bg-amber-500/10 dark:bg-amber-500/20", border: "border-amber-500/20", iconColor: "text-amber-500" },
+                        ].map(({ label, value, icon: Icon, bg, border, iconColor }) => (
+                            <div key={label} className="bg-white dark:bg-[#1a1a1a] rounded-3xl p-5 border border-gray-200 dark:border-white/10 shadow-sm flex items-center gap-4 transition-all hover:shadow-md">
+                                <div className={`w-11 h-11 rounded-full ${bg} flex items-center justify-center shrink-0 border ${border}`}>
+                                    <Icon className={`w-5 h-5 ${iconColor}`} strokeWidth={2} />
+                                </div>
+                                <div>
+                                    <p className="text-2xl font-bold text-gray-900 dark:text-white leading-tight">{value}</p>
+                                    <p className="text-[11px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{label}</p>
+                                </div>
                             </div>
-                            <div>
-                                <p className="text-2xl font-bold text-gray-900 dark:text-white leading-tight">
-                                    {messages.length}
-                                </p>
-                                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                    Total Messages
-                                </p>
+                        ))}
+                    </div>
+
+                    {/* Portfolio Analytics Panel */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+                        {/* 7-Day Visit Bar Chart */}
+                        <div className="bg-white dark:bg-[#1a1a1a] rounded-3xl p-6 border border-gray-200 dark:border-white/10 shadow-sm">
+                            <div className="flex items-center gap-3 mb-5">
+                                <div className="w-10 h-10 rounded-full bg-sky-primary/10 dark:bg-sky-500/20 border border-sky-primary/20 flex items-center justify-center shrink-0">
+                                    <BarChart2 className="w-4 h-4 text-sky-primary" strokeWidth={2} />
+                                </div>
+                                <div>
+                                    <p className="text-sm font-bold text-gray-900 dark:text-white">Visitor Traffic</p>
+                                    <p className="text-[11px] text-gray-500 dark:text-gray-400">
+                                        {totalVisits.toLocaleString()} total &middot; {todayVisits} today
+                                    </p>
+                                </div>
                             </div>
+
+                            {weeklyData.length > 0 ? (
+                                <div className="flex items-end gap-2" style={{ height: "88px" }}>
+                                    {weeklyData.map((day, idx) => {
+                                        const maxV = Math.max(...weeklyData.map(d => d.visits), 1);
+                                        const pct  = Math.max((day.visits / maxV) * 100, 6);
+                                        const isToday = idx === weeklyData.length - 1;
+                                        return (
+                                            <div key={idx} className="flex flex-col items-center gap-1 flex-1">
+                                                <span className="text-[10px] font-semibold text-gray-500 dark:text-gray-400 leading-none">
+                                                    {day.visits > 0 ? day.visits : ""}
+                                                </span>
+                                                <div className="w-full relative rounded-t-lg overflow-hidden bg-gray-100 dark:bg-white/5" style={{ height: "60px" }}>
+                                                    <div
+                                                        className={`absolute bottom-0 left-0 right-0 rounded-t-lg transition-all duration-700 ${isToday ? "bg-sky-primary" : "bg-sky-primary/40 dark:bg-sky-500/30"}`}
+                                                        style={{ height: `${pct}%` }}
+                                                    />
+                                                </div>
+                                                <span className="text-[10px] text-gray-400 dark:text-gray-500">{day.date}</span>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            ) : (
+                                <div className="flex items-center justify-center h-20 text-sm text-gray-400">
+                                    No visit data yet
+                                </div>
+                            )}
                         </div>
 
-                        <div className="bg-white dark:bg-[#1a1a1a] rounded-3xl p-6 border border-gray-200 dark:border-white/10 shadow-sm flex items-center gap-4 transition-all hover:shadow-md">
-                            <div className="w-12 h-12 rounded-full bg-orange-500/10 dark:bg-orange-500/20 flex items-center justify-center shrink-0 border border-orange-500/20">
-                                <Clock className="w-5 h-5 text-orange-500" strokeWidth={2} />
+                        {/* Rating Breakdown */}
+                        <div className="bg-white dark:bg-[#1a1a1a] rounded-3xl p-6 border border-gray-200 dark:border-white/10 shadow-sm">
+                            <div className="flex items-start justify-between mb-5">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-full bg-amber-500/10 dark:bg-amber-500/20 border border-amber-500/20 flex items-center justify-center shrink-0">
+                                        <Star className="w-4 h-4 text-amber-500" strokeWidth={0} fill="currentColor" />
+                                    </div>
+                                    <div>
+                                        <p className="text-sm font-bold text-gray-900 dark:text-white">Visitor Ratings</p>
+                                        <p className="text-[11px] text-gray-500 dark:text-gray-400">
+                                            {totalRatings > 0 ? `${totalRatings} ${totalRatings === 1 ? "rating" : "ratings"}` : "No ratings yet"}
+                                        </p>
+                                    </div>
+                                </div>
+                                {avgRating > 0 && (
+                                    <div className="text-right">
+                                        <p className="text-2xl font-bold text-gray-900 dark:text-white leading-tight">{avgRating}</p>
+                                        <div className="flex gap-0.5 justify-end mt-0.5">
+                                            {[1,2,3,4,5].map(s => (
+                                                <Star key={s} className={`w-3 h-3 ${s <= Math.round(avgRating) ? "text-amber-400" : "text-gray-300 dark:text-gray-600"}`} strokeWidth={0} fill="currentColor" />
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
                             </div>
-                            <div>
-                                <p className="text-2xl font-bold text-gray-900 dark:text-white leading-tight">
-                                    {unreadCount}
-                                </p>
-                                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                    Unread
-                                </p>
-                            </div>
-                        </div>
-
-                        <div className="bg-white dark:bg-[#1a1a1a] rounded-3xl p-6 border border-gray-200 dark:border-white/10 shadow-sm flex items-center gap-4 transition-all hover:shadow-md">
-                            <div className="w-12 h-12 rounded-full bg-green-500/10 dark:bg-green-500/20 flex items-center justify-center shrink-0 border border-green-500/20">
-                                <Check className="w-5 h-5 text-green-500" strokeWidth={2} />
-                            </div>
-                            <div>
-                                <p className="text-2xl font-bold text-gray-900 dark:text-white leading-tight">
-                                    {messages.filter((m) => m.admin_reply).length}
-                                </p>
-                                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                    Replied
-                                </p>
+                            <div className="space-y-2.5">
+                                {[5, 4, 3, 2, 1].map(star => {
+                                    const count = ratingBreakdown[star] || 0;
+                                    const pct   = totalRatings > 0 ? Math.round((count / totalRatings) * 100) : 0;
+                                    return (
+                                        <div key={star} className="flex items-center gap-3">
+                                            <div className="flex items-center gap-1 w-10 shrink-0">
+                                                <span className="text-xs font-semibold text-gray-600 dark:text-gray-300 w-3">{star}</span>
+                                                <Star className="w-3 h-3 text-amber-400 shrink-0" strokeWidth={0} fill="currentColor" />
+                                            </div>
+                                            <div className="flex-1 h-2 bg-gray-100 dark:bg-white/5 rounded-full overflow-hidden">
+                                                <div
+                                                    className="h-full bg-amber-400 rounded-full transition-all duration-700"
+                                                    style={{ width: `${pct}%` }}
+                                                />
+                                            </div>
+                                            <span className="text-[11px] text-gray-400 dark:text-gray-500 w-6 text-right tabular-nums">{count}</span>
+                                        </div>
+                                    );
+                                })}
                             </div>
                         </div>
                     </div>
@@ -329,19 +454,47 @@ export default function Dashboard({ messages: initialMessages, unreadCount: init
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[600px] sm:h-[700px]">
                         {/* Messages List (Sidebar) */}
                         <div className="lg:col-span-4 bg-white dark:bg-[#1a1a1a] rounded-3xl border border-gray-200 dark:border-white/10 shadow-sm overflow-hidden flex flex-col">
-                            <div className="px-6 py-5 border-b border-gray-100 dark:border-white/5 bg-gray-50/50 dark:bg-[#1a1a1a]">
-                                <h2 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider">
-                                    Inbox
-                                </h2>
+                            {/* Sidebar Header: Search */}
+                            <div className="px-4 pt-4 pb-3 border-b border-gray-100 dark:border-white/5 space-y-3">
+                                <div className="relative">
+                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" strokeWidth={2} />
+                                    <input
+                                        type="text"
+                                        value={searchQuery}
+                                        onChange={e => setSearchQuery(e.target.value)}
+                                        placeholder="Search messages..."
+                                        className="w-full pl-9 pr-4 py-2.5 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-primary/40 focus:border-sky-primary transition-all"
+                                    />
+                                </div>
+                                {/* Filter tabs */}
+                                <div className="flex gap-1 bg-gray-100 dark:bg-white/5 rounded-xl p-1">
+                                    {[
+                                        { id: "all", label: "All" },
+                                        { id: "unread", label: "Unread" },
+                                        { id: "starred", label: "Starred" },
+                                        { id: "replied", label: "Replied" },
+                                    ].map(tab => (
+                                        <button
+                                            key={tab.id}
+                                            onClick={() => setFilterTab(tab.id)}
+                                            className={`flex-1 py-1.5 text-[11px] font-bold rounded-lg uppercase tracking-wide transition-all ${filterTab === tab.id ? "bg-white dark:bg-[#2a2a2a] text-sky-primary shadow-sm" : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-white"}`}
+                                        >
+                                            {tab.label}
+                                        </button>
+                                    ))}
+                                </div>
                             </div>
+
                             <div className="flex-1 overflow-y-auto custom-scrollbar">
-                                {conversations.length === 0 ? (
+                                {filteredConversations.length === 0 ? (
                                     <div className="p-8 text-center text-gray-500">
                                         <MessageSquare className="w-12 h-12 text-gray-300 mx-auto mb-3" strokeWidth={1.5} />
-                                        <p>No conversations yet</p>
+                                        <p className="text-sm">
+                                            {searchQuery ? "No results found" : filterTab === "starred" ? "No starred conversations" : "No conversations yet"}
+                                        </p>
                                     </div>
                                 ) : (
-                                    conversations.map((convo) => (
+                                    filteredConversations.map((convo) => (
                                         <button
                                             key={convo.email}
                                             onClick={() => handleSelectConversation(convo.email)}
@@ -372,15 +525,24 @@ export default function Dashboard({ messages: initialMessages, unreadCount: init
                                                         {formatDate(convo.latest_date)}
                                                     </span>
                                                 </div>
-                                                <p className={`text-[13px] truncate pr-4 ${!convo.is_read ? 'text-gray-900 dark:text-white font-semibold' : 'text-gray-500 dark:text-gray-400'}`}>
+                                                <p className={`text-[13px] truncate pr-1 ${!convo.is_read ? 'text-gray-900 dark:text-white font-semibold' : 'text-gray-500 dark:text-gray-400'}`}>
                                                     {[...convo.messages].sort((a,b)=> new Date(b.created_at)-new Date(a.created_at))[0].message}
                                                 </p>
                                             </div>
 
-                                            {/* Unread Dot Indicator */}
-                                            {!convo.is_read && (
-                                                <div className="w-2.5 h-2.5 bg-sky-primary rounded-full shrink-0 shadow-[0_0_8px_rgba(14,165,233,0.6)]"></div>
-                                            )}
+                                            {/* Right-side indicators */}
+                                            <div className="flex flex-col items-center gap-1.5 shrink-0">
+                                                <button
+                                                    onClick={(e) => toggleStar(convo.email, e)}
+                                                    className={`transition-colors ${starredEmails.has(convo.email) ? "text-amber-400" : "text-gray-300 dark:text-gray-600 hover:text-amber-400"}`}
+                                                    title={starredEmails.has(convo.email) ? "Unstar" : "Star"}
+                                                >
+                                                    <Star className="w-3.5 h-3.5" strokeWidth={starredEmails.has(convo.email) ? 0 : 2} fill={starredEmails.has(convo.email) ? "currentColor" : "none"} />
+                                                </button>
+                                                {!convo.is_read && (
+                                                    <div className="w-2 h-2 bg-sky-primary rounded-full shadow-[0_0_8px_rgba(14,165,233,0.6)]"></div>
+                                                )}
+                                            </div>
                                         </button>
                                     ))
                                 )}

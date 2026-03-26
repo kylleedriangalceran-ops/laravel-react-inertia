@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Message;
+use App\Models\PortfolioRating;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
@@ -19,20 +20,47 @@ class MessageController extends Controller
 
     public function index()
     {
-        // Cache messages list
         $messages = Cache::remember(self::CACHE_MESSAGES_KEY, self::CACHE_TTL, function () {
             return Message::orderBy('created_at', 'desc')->get();
         });
 
-        // Cache unread count
         $unreadCount = Cache::remember(self::CACHE_UNREAD_COUNT_KEY, self::CACHE_TTL, function () {
             return Message::where('is_read', false)->count();
         });
 
+        // Visit analytics
+        $totalVisits = (int) Cache::get('portfolio:total_visits', 0);
+        $todayVisits = (int) Cache::get('portfolio:visits:' . now()->format('Y-m-d'), 0);
+
+        $weeklyData = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $date = now()->subDays($i)->format('Y-m-d');
+            $weeklyData[] = [
+                'date'   => now()->subDays($i)->format('D'),
+                'visits' => (int) Cache::get('portfolio:visits:' . $date, 0),
+            ];
+        }
+
+        // Rating analytics
+        $avgRating    = round(PortfolioRating::avg('rating') ?? 0, 1);
+        $totalRatings = PortfolioRating::count();
+        $ratingBreakdown = [];
+        for ($star = 5; $star >= 1; $star--) {
+            $ratingBreakdown[$star] = PortfolioRating::where('rating', $star)->count();
+        }
+
         return Inertia::render('Admin/Dashboard', [
-            'messages' => $messages,
+            'messages'    => $messages,
             'unreadCount' => $unreadCount,
             'cacheDriver' => config('cache.default'),
+            'analytics'   => [
+                'totalVisits'     => $totalVisits,
+                'todayVisits'     => $todayVisits,
+                'weeklyData'      => $weeklyData,
+                'avgRating'       => $avgRating,
+                'totalRatings'    => $totalRatings,
+                'ratingBreakdown' => $ratingBreakdown,
+            ],
         ]);
     }
 

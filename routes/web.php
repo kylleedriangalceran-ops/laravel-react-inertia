@@ -1,13 +1,64 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Cache;
 use Inertia\Inertia;
 use App\Http\Controllers\Admin\MessageController;
 use App\Http\Controllers\ContactController;
 
 Route::get('/', function () {
-    return Inertia::render('Welcome');
+    // Track one visit per browser session
+    if (!session()->has('visit_counted')) {
+        session(['visit_counted' => true]);
+        Cache::increment('portfolio:total_visits');
+        $dayKey = 'portfolio:visits:' . now()->format('Y-m-d');
+        Cache::add($dayKey, 0, now()->addDays(10));
+        Cache::increment($dayKey);
+    }
+
+    $totalVisits  = (int) Cache::get('portfolio:total_visits', 0);
+    $avgRating    = round(\App\Models\PortfolioRating::avg('rating') ?? 0, 1);
+    $totalRatings = \App\Models\PortfolioRating::count();
+
+    // Fetch testimonials (ratings with comments)
+    $testimonials = \App\Models\PortfolioRating::whereNotNull('comment')
+        ->whereNotNull('name')
+        ->orderBy('created_at', 'desc')
+        ->get()
+        ->map(function ($rating) {
+            return [
+                'name' => $rating->name,
+                'rating' => $rating->rating,
+                'comment' => $rating->comment,
+                'date' => $rating->created_at->toISOString(),
+            ];
+        });
+
+    return Inertia::render('Welcome', [
+        'totalVisits'  => $totalVisits,
+        'avgRating'    => $avgRating,
+        'totalRatings' => $totalRatings,
+        'testimonials' => $testimonials,
+    ]);
 });
+
+Route::post('/analytics/rate', function (\Illuminate\Http\Request $request) {
+    $validated = $request->validate([
+        'rating' => 'required|integer|min:1|max:5',
+        'name' => 'nullable|string|max:255',
+        'comment' => 'nullable|string|max:1000',
+    ]);
+
+    \App\Models\PortfolioRating::create([
+        'rating' => $validated['rating'],
+        'name' => $validated['name'] ?? null,
+        'comment' => $validated['comment'] ?? null,
+    ]);
+
+    $avgRating    = round(\App\Models\PortfolioRating::avg('rating') ?? 0, 1);
+    $totalRatings = \App\Models\PortfolioRating::count();
+    return response()->json(['success' => true, 'avgRating' => $avgRating, 'totalRatings' => $totalRatings]);
+})->name('analytics.rate');
 
 Route::post('/contact', [ContactController::class, 'sendContactEmail'])->name('contact.send');
 Route::get('/contact/{id}/status', [ContactController::class, 'messageStatus'])->name('contact.status');

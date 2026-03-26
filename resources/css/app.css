@@ -61,3 +61,19 @@
     background-image: radial-gradient(#7ec8e3 0.5px, transparent 0.5px), radial-gradient(#7ec8e3 0.5px, transparent 0.5px);
     opacity: 0.1;
 }
+
+/* Testimonial Carousel Animations */
+@keyframes testimonialFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.testimonial-enter {
+    animation: testimonialFadeIn 0.5s ease-out forwards;
+}

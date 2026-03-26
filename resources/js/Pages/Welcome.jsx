@@ -17,8 +17,19 @@ import {
     Mail,
     Phone,
     Send,
+    Briefcase,
+    Award,
+    Trophy,
+    Calendar,
+    ExternalLink,
+    Clock,
+    Tag,
+    Star,
+    Eye,
 } from "lucide-react";
+import axios from "axios";
 import Layout from "../Layouts/Layout";
+import SectionHeader from "../Components/SectionHeader";
 
 const Typewriter = ({
     text,
@@ -65,22 +76,153 @@ import useSkills from "../Hooks/useSkills";
 import ContactForm from "../Components/ContactForm";
 import SkillCard from "../Components/SkillCard";
 import CategoryToggle from "../Components/CategoryToggle";
+import TestimonialCarousel from "../Components/TestimonialCarousel";
 
-export default function Welcome() {
+export default function Welcome({ totalVisits = 0, avgRating = 0, totalRatings = 0, testimonials = [] }) {
     const [aboutRef, aboutIsVisible] = useScrollReveal();
+    const [experienceRef, experienceIsVisible] = useScrollReveal();
     const [educationRef, educationIsVisible] = useScrollReveal();
     const [skillsRef, skillsIsVisible] = useScrollReveal();
     const [projectsRef, projectsIsVisible] = useScrollReveal();
+    const [certsRef, certsIsVisible] = useScrollReveal();
+    const [testimonialsRef, testimonialsIsVisible] = useScrollReveal();
+    const [blogRef, blogIsVisible] = useScrollReveal();
     const [contactRef, contactIsVisible] = useScrollReveal();
 
     const [activeProject, setActiveProject] = useState(0);
     const { activeCategory, setActiveCategory, categories, getCurrentSkills } =
         useSkills();
 
+    const [hasRated, setHasRated] = useState(() => {
+        try { return !!localStorage.getItem("portfolio_rated"); } catch { return false; }
+    });
+    const [submittedRating, setSubmittedRating] = useState(() => {
+        try { return parseInt(localStorage.getItem("portfolio_rated")) || 0; } catch { return 0; }
+    });
+    const [hoverStar, setHoverStar] = useState(0);
+    const [liveAvg, setLiveAvg] = useState(avgRating);
+    const [liveTotal, setLiveTotal] = useState(totalRatings);
+
+    const handleRate = (star) => {
+        if (hasRated) return;
+        axios.post("/analytics/rate", { rating: star })
+            .then((res) => {
+                setHasRated(true);
+                setSubmittedRating(star);
+                setHoverStar(0);
+                localStorage.setItem("portfolio_rated", String(star));
+                if (res.data.avgRating) setLiveAvg(res.data.avgRating);
+                if (res.data.totalRatings) setLiveTotal(res.data.totalRatings);
+            })
+            .catch(() => { });
+    };
+
     const scrollToSection = (e, id) => {
         e.preventDefault();
         document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
     };
+
+    const experiences = [
+        {
+            role: "Freelance Web Developer",
+            company: "Self-Employed",
+            period: "2024 — Present",
+            desc: "Designing and building full-stack web applications for clients using Laravel, React, and Inertia.js. Focused on clean UI, performant back-ends, and great user experiences.",
+            tags: ["Laravel", "React", "Inertia.js", "TailwindCSS", "MySQL"],
+            type: "Freelance",
+            isActive: true,
+        },
+        {
+            role: "System Analyst",
+            company: "MSU Naawan — EduGrade Project",
+            period: "2023 — 2024",
+            desc: "As a System Analyst of the development of EduGrade project, a digital gradebook system for Naawan Central School. Handled architecture, database design, UI/UX in Figma, and deployment.",
+            tags: ["Laravel", "Vue.js", "PostgreSQL", "Figma", "Inertia.js"],
+            type: "Capstone",
+            isActive: false,
+        },
+    ];
+
+    const certs = [
+        {
+            title: "Responsive Web Design",
+            issuer: "freeCodeCamp",
+            date: "2023",
+            desc: "300 hours of training in HTML, CSS, and building accessible, responsive web layouts.",
+            type: "Certificate",
+            color: "sky",
+        },
+        {
+            title: "JavaScript Algorithms & Data Structures",
+            issuer: "freeCodeCamp",
+            date: "2023",
+            desc: "300 hours of JavaScript covering ES6, functional programming, OOP, and algorithm challenges.",
+            type: "Certificate",
+            color: "sky",
+        },
+        {
+            title: "Best Capstone Project",
+            issuer: "MSU Naawan — BSIT Dept.",
+            date: "2025",
+            desc: "Recognized for outstanding final-year project: EduGrade Digital Gradebook System.",
+            type: "Achievement",
+            color: "amber",
+        },
+        {
+            title: "React — The Complete Guide",
+            issuer: "Udemy",
+            date: "2024",
+            desc: "Comprehensive React course covering hooks, context API, Redux, and real-world project builds.",
+            type: "Certificate",
+            color: "sky",
+        },
+        {
+            title: "The Web Developer Bootcamp",
+            issuer: "Udemy",
+            date: "2023",
+            desc: "Full-stack web development bootcamp covering HTML, CSS, JS, Node.js, MongoDB, and REST APIs.",
+            type: "Certificate",
+            color: "sky",
+        },
+        {
+            title: "Dean's List Awardee",
+            issuer: "MSU Naawan",
+            date: "2022–2024",
+            desc: "Consistently recognized on the Dean's List for academic excellence across multiple semesters.",
+            type: "Achievement",
+            color: "amber",
+        },
+    ];
+
+    const blogs = [
+        {
+            title: "Why I Chose Laravel + React (Inertia) for My Stack",
+            category: "Stack Thoughts",
+            excerpt:
+                "A full-stack PHP framework paired with a modern JS library — here's why this combo clicked for me and how it changed how I build apps.",
+            readTime: "5 min read",
+            date: "Mar 2025",
+            tags: ["Laravel", "React", "Inertia"],
+        },
+        {
+            title: "Clean Code Habits I Picked Up as a Junior Dev",
+            category: "Dev Tips",
+            excerpt:
+                "From meaningful variable names to avoiding premature abstraction — small daily habits that made a huge difference in code quality.",
+            readTime: "4 min read",
+            date: "Feb 2025",
+            tags: ["Clean Code", "Best Practices"],
+        },
+        {
+            title: "Building Real-Time Chat with HTTP Polling",
+            category: "Tutorial",
+            excerpt:
+                "No WebSockets needed. Here's how I built a functional live chat feature using simple interval polling in Laravel + React.",
+            readTime: "7 min read",
+            date: "Jan 2025",
+            tags: ["Laravel", "React", "Real-time"],
+        },
+    ];
 
     const projects = [
         {
@@ -298,9 +440,8 @@ export default function Welcome() {
             <section
                 id="about"
                 ref={aboutRef}
-                className={`relative py-40 bg-transparent transition-colors duration-300 reveal overflow-hidden ${
-                    aboutIsVisible ? "visible" : ""
-                }`}
+                className={`relative py-40 bg-transparent transition-colors duration-300 reveal overflow-hidden ${aboutIsVisible ? "visible" : ""
+                    }`}
             >
                 <div className="max-w-7xl mx-auto px-6 relative">
                     {/* Section Header - Centered as per screenshot */}
@@ -513,13 +654,80 @@ export default function Welcome() {
             {/* Section Divider */}
             <div className="w-full h-px bg-linear-to-r from-transparent via-sky-primary/20 to-transparent"></div>
 
+            {/* Experience Section */}
+            <section
+                id="experience"
+                ref={experienceRef}
+                className={`relative py-32 bg-transparent transition-colors duration-300 reveal ${experienceIsVisible ? "visible" : ""}`}
+            >
+                <div className="max-w-6xl mx-auto px-6">
+                    <SectionHeader
+                        label="Experiences"
+                        title="My Journey So Far"
+                        subtitle="Professional work and key projects that shaped my skills."
+                        className="mb-20"
+                    />
+
+                    <div className="relative max-w-3xl mx-auto">
+                        {/* Vertical line */}
+                        <div className="absolute left-6 top-0 bottom-0 w-px bg-sky-200 dark:bg-white/10"></div>
+
+                        <div className="space-y-10">
+                            {experiences.map((exp, index) => (
+                                <div key={index} className="relative pl-16">
+                                    {/* Timeline dot */}
+                                    <div className="absolute left-[24px] top-8 flex items-center justify-center -translate-x-1/2">
+                                        {exp.isActive ? (
+                                            <div className="w-[18px] h-[18px] rounded-full border-[4px] border-white dark:border-[#111111] bg-sky-300 ring-[6px] ring-sky-50 dark:ring-sky-900/40"></div>
+                                        ) : (
+                                            <div className="w-3.5 h-3.5 rounded-full bg-gray-300 dark:bg-gray-600 ring-[5px] ring-white dark:ring-[#111111]"></div>
+                                        )}
+                                    </div>
+
+                                    {/* Card */}
+                                    <div className="bg-white/90 dark:bg-[#111111]/80 backdrop-blur-md rounded-[2rem] p-8 shadow-xl shadow-gray-200/50 dark:shadow-black/40 border border-gray-100 dark:border-white/5 hover:border-sky-500/30 transition-all duration-300">
+                                        <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+                                            <span className={`text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-widest ${exp.type === "Freelance" || exp.isActive ? "bg-sky-50 dark:bg-sky-500/10 text-sky-600 dark:text-sky-400" : "bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-gray-400"}`}>
+                                                {exp.type}
+                                            </span>
+                                            <span className={`text-[11px] font-bold px-3 py-1.5 rounded-full uppercase tracking-widest ${exp.isActive ? "bg-sky-50 dark:bg-sky-500/10 text-sky-500" : "bg-gray-100 dark:bg-white/5 text-gray-400 dark:text-gray-500"}`}>
+                                                {exp.period}
+                                            </span>
+                                        </div>
+                                        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-1">
+                                            {exp.role}
+                                        </h3>
+                                        <div className="flex items-center gap-1.5 text-gray-500 dark:text-gray-400 text-sm mb-4">
+                                            <Briefcase className="w-4 h-4 shrink-0" />
+                                            <span>{exp.company}</span>
+                                        </div>
+                                        <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed mb-5">
+                                            {exp.desc}
+                                        </p>
+                                        <div className="flex flex-wrap gap-2">
+                                            {exp.tags.map((tag, i) => (
+                                                <span key={i} className="px-3 py-1 bg-sky-50 dark:bg-sky-900/20 text-sky-700 dark:text-sky-300 rounded-lg text-xs font-semibold border border-sky-100 dark:border-sky-800/30">
+                                                    {tag}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* Section Divider */}
+            <div className="w-full h-px bg-linear-to-r from-transparent via-sky-primary/20 to-transparent"></div>
+
             {/* Education Section */}
             <section
                 id="education"
                 ref={educationRef}
-                className={`relative py-32 bg-transparent transition-colors duration-300 reveal ${
-                    educationIsVisible ? "visible" : ""
-                }`}
+                className={`relative py-32 bg-transparent transition-colors duration-300 reveal ${educationIsVisible ? "visible" : ""
+                    }`}
             >
                 <div className="max-w-6xl mx-auto px-6">
                     {/* Education Section Header */}
@@ -702,9 +910,8 @@ export default function Welcome() {
             <section
                 id="skills"
                 ref={skillsRef}
-                className={`relative py-40 bg-transparent transition-colors duration-300 reveal ${
-                    skillsIsVisible ? "visible" : ""
-                }`}
+                className={`relative py-24 bg-transparent transition-colors duration-300 reveal ${skillsIsVisible ? "visible" : ""
+                    }`}
             >
                 {/* Subtle background decoration */}
                 <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -742,37 +949,27 @@ export default function Welcome() {
                         style={{ animationDuration: "0.4s" }}
                     >
                         {activeCategory === "development" ? (
-                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
                                 {/* Back-end Card */}
-                                <div className="bg-white dark:bg-[#111111]/80 backdrop-blur-md rounded-[2.5rem] p-10 lg:p-12 shadow-xl dark:shadow-2xl shadow-gray-200/50 dark:shadow-black/40 border border-gray-100 dark:border-white/5 flex flex-col h-full group hover:border-sky-500/30 transition-all duration-300">
-                                    <h3 className="text-3xl font-extrabold text-gray-900 dark:text-white mb-2 tracking-tight">
+                                <div className="bg-white dark:bg-[#111111]/80 backdrop-blur-md rounded-[2rem] p-7 lg:p-8 shadow-xl dark:shadow-2xl shadow-gray-200/50 dark:shadow-black/40 border border-gray-100 dark:border-white/5 flex flex-col h-full group hover:border-sky-500/30 transition-all duration-300">
+                                    <h3 className="text-xl font-extrabold text-gray-900 dark:text-white mb-1 tracking-tight">
                                         Back-end Development
                                     </h3>
-                                    <p className="text-gray-400 dark:text-gray-500 font-medium mb-6">
+                                    <p className="text-gray-400 dark:text-gray-500 font-medium text-sm mb-4">
                                         Powering the engine behind the scenes
                                     </p>
-                                    <p className="text-gray-500 dark:text-gray-400 italic text-sm mb-10 leading-relaxed max-w-sm">
+                                    <p className="text-gray-500 dark:text-gray-400 italic text-xs mb-6 leading-relaxed max-w-sm">
                                         Building robust, scalable server-side
                                         applications and managing data
                                         efficiently.
                                     </p>
-                                    <div className="flex flex-col gap-6 mt-auto">
+                                    <div className="flex flex-col gap-4 mt-auto">
                                         {getCurrentSkills()
-                                            .filter(
-                                                (skill) =>
-                                                    skill.type === "backend",
-                                            )
+                                            .filter((skill) => skill.type === "backend")
                                             .map((skill) => (
-                                                <div
-                                                    key={`backend-${skill.name}`}
-                                                    className="flex items-center gap-5 group/skill"
-                                                >
-                                                    <img
-                                                        src={skill.logo}
-                                                        alt={skill.name}
-                                                        className="w-8 h-8 object-contain group-hover/skill:scale-110 transition-transform duration-300 shrink-0"
-                                                    />
-                                                    <span className="text-gray-700 dark:text-gray-300 font-semibold text-lg">
+                                                <div key={`backend-${skill.name}`} className="flex items-center gap-3 group/skill">
+                                                    <img src={skill.logo} alt={skill.name} className="w-6 h-6 object-contain group-hover/skill:scale-110 transition-transform duration-300 shrink-0" />
+                                                    <span className="text-gray-700 dark:text-gray-300 font-semibold text-sm">
                                                         {skill.name}
                                                     </span>
                                                 </div>
@@ -781,35 +978,24 @@ export default function Welcome() {
                                 </div>
 
                                 {/* Front-end Card */}
-                                <div className="bg-white dark:bg-[#111111]/80 backdrop-blur-md rounded-[2.5rem] p-10 lg:p-12 shadow-xl dark:shadow-2xl shadow-gray-200/50 dark:shadow-black/40 border border-gray-100 dark:border-white/5 flex flex-col h-full group hover:border-sky-500/30 transition-all duration-300">
-                                    <h3 className="text-3xl font-extrabold text-gray-900 dark:text-white mb-2 tracking-tight">
+                                <div className="bg-white dark:bg-[#111111]/80 backdrop-blur-md rounded-[2rem] p-7 lg:p-8 shadow-xl dark:shadow-2xl shadow-gray-200/50 dark:shadow-black/40 border border-gray-100 dark:border-white/5 flex flex-col h-full group hover:border-sky-500/30 transition-all duration-300">
+                                    <h3 className="text-xl font-extrabold text-gray-900 dark:text-white mb-1 tracking-tight">
                                         Front-end Development
                                     </h3>
-                                    <p className="text-gray-400 dark:text-gray-500 font-medium mb-6">
-                                        Crafting beautiful interactive
-                                        interfaces
+                                    <p className="text-gray-400 dark:text-gray-500 font-medium text-sm mb-4">
+                                        Crafting beautiful interactive interfaces
                                     </p>
-                                    <p className="text-gray-500 dark:text-gray-400 italic text-sm mb-10 leading-relaxed max-w-sm">
+                                    <p className="text-gray-500 dark:text-gray-400 italic text-xs mb-6 leading-relaxed max-w-sm">
                                         Translating designs into responsive,
                                         high-performance user experiences.
                                     </p>
-                                    <div className="flex flex-col gap-6 mt-auto">
+                                    <div className="flex flex-col gap-4 mt-auto">
                                         {getCurrentSkills()
-                                            .filter(
-                                                (skill) =>
-                                                    skill.type === "frontend",
-                                            )
+                                            .filter((skill) => skill.type === "frontend")
                                             .map((skill) => (
-                                                <div
-                                                    key={`frontend-${skill.name}`}
-                                                    className="flex items-center gap-5 group/skill"
-                                                >
-                                                    <img
-                                                        src={skill.logo}
-                                                        alt={skill.name}
-                                                        className="w-8 h-8 object-contain group-hover/skill:scale-110 transition-transform duration-300 shrink-0"
-                                                    />
-                                                    <span className="text-gray-700 dark:text-gray-300 font-semibold text-lg">
+                                                <div key={`frontend-${skill.name}`} className="flex items-center gap-3 group/skill">
+                                                    <img src={skill.logo} alt={skill.name} className="w-6 h-6 object-contain group-hover/skill:scale-110 transition-transform duration-300 shrink-0" />
+                                                    <span className="text-gray-700 dark:text-gray-300 font-semibold text-sm">
                                                         {skill.name}
                                                     </span>
                                                 </div>
@@ -818,36 +1004,27 @@ export default function Welcome() {
                                 </div>
                             </div>
                         ) : (
-                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
+                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
                                 {/* UI/UX Card */}
-                                <div className="bg-white dark:bg-[#111111]/80 backdrop-blur-md rounded-[2.5rem] p-10 lg:p-12 shadow-xl dark:shadow-2xl shadow-gray-200/50 dark:shadow-black/40 border border-gray-100 dark:border-white/5 flex flex-col h-full group hover:border-sky-500/30 transition-all duration-300">
-                                    <h3 className="text-3xl font-extrabold text-gray-900 dark:text-white mb-2 tracking-tight">
+                                <div className="bg-white dark:bg-[#111111]/80 backdrop-blur-md rounded-[2rem] p-7 lg:p-8 shadow-xl dark:shadow-2xl shadow-gray-200/50 dark:shadow-black/40 border border-gray-100 dark:border-white/5 flex flex-col h-full group hover:border-sky-500/30 transition-all duration-300">
+                                    <h3 className="text-xl font-extrabold text-gray-900 dark:text-white mb-1 tracking-tight">
                                         UI/UX Design
                                     </h3>
-                                    <p className="text-gray-400 dark:text-gray-500 font-medium mb-6">
+                                    <p className="text-gray-400 dark:text-gray-500 font-medium text-sm mb-4">
                                         User-centric experiences
                                     </p>
-                                    <p className="text-gray-500 dark:text-gray-400 italic text-sm mb-10 leading-relaxed">
+                                    <p className="text-gray-500 dark:text-gray-400 italic text-xs mb-6 leading-relaxed">
                                         Focusing on intuitive flows, elegant
                                         visuals, and pixel-perfect attention to
                                         detail.
                                     </p>
-                                    <div className="flex flex-col gap-6 mt-auto">
+                                    <div className="flex flex-col gap-4 mt-auto">
                                         {getCurrentSkills()
-                                            .filter(
-                                                (skill) => skill.type === "ui",
-                                            )
+                                            .filter((skill) => skill.type === "ui")
                                             .map((skill) => (
-                                                <div
-                                                    key={`ui-${skill.name}`}
-                                                    className="flex items-center gap-5 group/skill"
-                                                >
-                                                    <img
-                                                        src={skill.logo}
-                                                        alt={skill.name}
-                                                        className="w-8 h-8 object-contain group-hover/skill:scale-110 transition-transform duration-300 shrink-0"
-                                                    />
-                                                    <span className="text-gray-700 dark:text-gray-300 font-semibold text-lg">
+                                                <div key={`ui-${skill.name}`} className="flex items-center gap-3 group/skill">
+                                                    <img src={skill.logo} alt={skill.name} className="w-6 h-6 object-contain group-hover/skill:scale-110 transition-transform duration-300 shrink-0" />
+                                                    <span className="text-gray-700 dark:text-gray-300 font-semibold text-sm">
                                                         {skill.name}
                                                     </span>
                                                 </div>
@@ -856,35 +1033,24 @@ export default function Welcome() {
                                 </div>
 
                                 {/* Tools Card */}
-                                <div className="bg-white dark:bg-[#111111]/80 backdrop-blur-md rounded-[2.5rem] p-10 lg:p-12 shadow-xl dark:shadow-2xl shadow-gray-200/50 dark:shadow-black/40 border border-gray-100 dark:border-white/5 flex flex-col h-full group hover:border-sky-500/30 transition-all duration-300">
-                                    <h3 className="text-3xl font-extrabold text-gray-900 dark:text-white mb-2 tracking-tight">
+                                <div className="bg-white dark:bg-[#111111]/80 backdrop-blur-md rounded-[2rem] p-7 lg:p-8 shadow-xl dark:shadow-2xl shadow-gray-200/50 dark:shadow-black/40 border border-gray-100 dark:border-white/5 flex flex-col h-full group hover:border-sky-500/30 transition-all duration-300">
+                                    <h3 className="text-xl font-extrabold text-gray-900 dark:text-white mb-1 tracking-tight">
                                         Tools
                                     </h3>
-                                    <p className="text-gray-400 dark:text-gray-500 font-medium mb-6">
+                                    <p className="text-gray-400 dark:text-gray-500 font-medium text-sm mb-4">
                                         My workflow essentials
                                     </p>
-                                    <p className="text-gray-500 dark:text-gray-400 italic text-sm mb-10 leading-relaxed">
+                                    <p className="text-gray-500 dark:text-gray-400 italic text-xs mb-6 leading-relaxed">
                                         Version control, editors, and modern
                                         utilities that boost daily productivity.
                                     </p>
-                                    <div className="flex flex-col gap-6 mt-auto">
+                                    <div className="flex flex-col gap-4 mt-auto">
                                         {getCurrentSkills()
-                                            .filter(
-                                                (skill) =>
-                                                    skill.type === "tool" ||
-                                                    skill.type === "repository",
-                                            )
+                                            .filter((skill) => skill.type === "tool" || skill.type === "repository")
                                             .map((skill) => (
-                                                <div
-                                                    key={`tool-${skill.name}`}
-                                                    className="flex items-center gap-5 group/skill"
-                                                >
-                                                    <img
-                                                        src={skill.logo}
-                                                        alt={skill.name}
-                                                        className="w-8 h-8 object-contain group-hover/skill:scale-110 transition-transform duration-300 shrink-0"
-                                                    />
-                                                    <span className="text-gray-700 dark:text-gray-300 font-semibold text-lg">
+                                                <div key={`tool-${skill.name}`} className="flex items-center gap-3 group/skill">
+                                                    <img src={skill.logo} alt={skill.name} className="w-6 h-6 object-contain group-hover/skill:scale-110 transition-transform duration-300 shrink-0" />
+                                                    <span className="text-gray-700 dark:text-gray-300 font-semibold text-sm">
                                                         {skill.name}
                                                     </span>
                                                 </div>
@@ -893,35 +1059,25 @@ export default function Welcome() {
                                 </div>
 
                                 {/* Deployment Card */}
-                                <div className="bg-white dark:bg-[#111111]/80 backdrop-blur-md rounded-[2.5rem] p-10 lg:p-12 shadow-xl dark:shadow-2xl shadow-gray-200/50 dark:shadow-black/40 border border-gray-100 dark:border-white/5 flex flex-col h-full group hover:border-sky-500/30 transition-all duration-300">
-                                    <h3 className="text-3xl font-extrabold text-gray-900 dark:text-white mb-2 tracking-tight">
+                                <div className="bg-white dark:bg-[#111111]/80 backdrop-blur-md rounded-[2rem] p-7 lg:p-8 shadow-xl dark:shadow-2xl shadow-gray-200/50 dark:shadow-black/40 border border-gray-100 dark:border-white/5 flex flex-col h-full group hover:border-sky-500/30 transition-all duration-300">
+                                    <h3 className="text-xl font-extrabold text-gray-900 dark:text-white mb-1 tracking-tight">
                                         Deployment
                                     </h3>
-                                    <p className="text-gray-400 dark:text-gray-500 font-medium mb-6">
+                                    <p className="text-gray-400 dark:text-gray-500 font-medium text-sm mb-4">
                                         Shipping code to production
                                     </p>
-                                    <p className="text-gray-500 dark:text-gray-400 italic text-sm mb-10 leading-relaxed">
+                                    <p className="text-gray-500 dark:text-gray-400 italic text-xs mb-6 leading-relaxed">
                                         Platforms and services used to host,
                                         scale, and deliver applications
                                         globally.
                                     </p>
-                                    <div className="flex flex-col gap-6 mt-auto">
+                                    <div className="flex flex-col gap-4 mt-auto">
                                         {getCurrentSkills()
-                                            .filter(
-                                                (skill) =>
-                                                    skill.type === "deployment",
-                                            )
+                                            .filter((skill) => skill.type === "deployment")
                                             .map((skill) => (
-                                                <div
-                                                    key={`dep-${skill.name}`}
-                                                    className="flex items-center gap-5 group/skill"
-                                                >
-                                                    <img
-                                                        src={skill.logo}
-                                                        alt={skill.name}
-                                                        className="w-8 h-8 object-contain group-hover/skill:scale-110 transition-transform duration-300 shrink-0"
-                                                    />
-                                                    <span className="text-gray-700 dark:text-gray-300 font-semibold text-lg">
+                                                <div key={`dep-${skill.name}`} className="flex items-center gap-3 group/skill">
+                                                    <img src={skill.logo} alt={skill.name} className="w-6 h-6 object-contain group-hover/skill:scale-110 transition-transform duration-300 shrink-0" />
+                                                    <span className="text-gray-700 dark:text-gray-300 font-semibold text-sm">
                                                         {skill.name}
                                                     </span>
                                                 </div>
@@ -941,9 +1097,8 @@ export default function Welcome() {
             <section
                 id="projects"
                 ref={projectsRef}
-                className={`relative py-40 bg-transparent transition-colors duration-300 reveal ${
-                    projectsIsVisible ? "visible" : ""
-                }`}
+                className={`relative py-40 bg-transparent transition-colors duration-300 reveal ${projectsIsVisible ? "visible" : ""
+                    }`}
             >
                 <div className="max-w-7xl mx-auto px-6">
                     <div className="text-center mb-20 flex flex-col items-center">
@@ -967,22 +1122,22 @@ export default function Welcome() {
                             const progressColor = project.progress === 100
                                 ? "bg-emerald-500"
                                 : project.progress >= 60
-                                ? "bg-amber-500"
-                                : project.progress >= 30
-                                ? "bg-orange-500"
-                                : "bg-red-500";
+                                    ? "bg-amber-500"
+                                    : project.progress >= 30
+                                        ? "bg-orange-500"
+                                        : "bg-red-500";
 
                             const statusColor = project.status === "Finished"
                                 ? "text-emerald-600 dark:text-emerald-400 bg-emerald-50/90 dark:bg-emerald-500/20 border-emerald-200/50 dark:border-emerald-500/30"
                                 : project.status === "In Progress"
-                                ? "text-amber-600 dark:text-amber-400 bg-amber-50/90 dark:bg-amber-500/20 border-amber-200/50 dark:border-amber-500/30"
-                                : "text-red-600 dark:text-red-400 bg-red-50/90 dark:bg-red-500/20 border-red-200/50 dark:border-red-500/30";
+                                    ? "text-amber-600 dark:text-amber-400 bg-amber-50/90 dark:bg-amber-500/20 border-amber-200/50 dark:border-amber-500/30"
+                                    : "text-red-600 dark:text-red-400 bg-red-50/90 dark:bg-red-500/20 border-red-200/50 dark:border-red-500/30";
 
                             const dotColor = project.status === "Finished"
                                 ? "bg-emerald-500"
                                 : project.status === "In Progress"
-                                ? "bg-amber-500 animate-pulse"
-                                : "bg-red-500 animate-pulse";
+                                    ? "bg-amber-500 animate-pulse"
+                                    : "bg-red-500 animate-pulse";
 
                             const animClass = projectsIsVisible
                                 ? (index % 2 === 0 ? 'animate-slide-in-left' : 'animate-slide-in-right')
@@ -1091,6 +1246,210 @@ export default function Welcome() {
                     </div>
                 </div>
             </section>
+
+            {/* Section Divider */}
+            <div className="w-full h-px bg-linear-to-r from-transparent via-sky-primary/20 to-transparent"></div>
+
+            {/* Certs & Achievements Section */}
+            <section
+                id="achievements"
+                ref={certsRef}
+                className={`relative py-40 bg-transparent transition-colors duration-300 reveal ${certsIsVisible ? "visible" : ""}`}
+            >
+                <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                    <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-amber-100 dark:bg-amber-900/5 rounded-full blur-3xl opacity-20"></div>
+                </div>
+
+                <div className="relative max-w-7xl mx-auto px-6">
+                    <SectionHeader
+                        label="Achievements"
+                        title="Certs & Recognition"
+                        subtitle="Milestones in learning, growth, and academic excellence."
+                        className="mb-16"
+                    />
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {certs.map((cert, index) => (
+                            <div
+                                key={index}
+                                className="group bg-white/90 dark:bg-[#111111]/80 backdrop-blur-md rounded-[2rem] p-8 shadow-xl shadow-gray-200/50 dark:shadow-black/40 border border-gray-100 dark:border-white/5 hover:border-sky-500/30 transition-all duration-300 flex flex-col"
+                            >
+                                <div className="flex items-start justify-between mb-5">
+                                    <div className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 ${cert.color === "amber" ? "bg-amber-50 dark:bg-amber-900/20" : "bg-sky-50 dark:bg-sky-900/10"}`}>
+                                        {cert.type === "Achievement" ? (
+                                            <Trophy className={`w-6 h-6 ${cert.color === "amber" ? "text-amber-500" : "text-sky-500"}`} strokeWidth={1.5} />
+                                        ) : (
+                                            <Award className="w-6 h-6 text-sky-500" strokeWidth={1.5} />
+                                        )}
+                                    </div>
+                                    <span className={`text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-widest ${cert.type === "Achievement" ? "bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400" : "bg-sky-50 dark:bg-sky-900/20 text-sky-600 dark:text-sky-400"}`}>
+                                        {cert.type}
+                                    </span>
+                                </div>
+
+                                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1 leading-snug">
+                                    {cert.title}
+                                </h3>
+                                <div className="flex items-center gap-1.5 text-gray-400 dark:text-gray-500 text-xs font-semibold uppercase tracking-wider mb-4">
+                                    <Calendar className="w-3.5 h-3.5" />
+                                    <span>{cert.issuer} · {cert.date}</span>
+                                </div>
+                                <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed grow">
+                                    {cert.desc}
+                                </p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+            {/* Section Divider */}
+            <div className="w-full h-px bg-linear-to-r from-transparent via-sky-primary/20 to-transparent"></div>
+
+            {/* Blog / Insights Section */}
+            <section
+                id="blog"
+                ref={blogRef}
+                className={`relative py-40 bg-transparent transition-colors duration-300 reveal ${blogIsVisible ? "visible" : ""}`}
+            >
+                <div className="relative max-w-7xl mx-auto px-6">
+                    <SectionHeader
+                        label="Blog"
+                        title="Thoughts & Insights"
+                        subtitle="Things I've learned, built, and thought deeply about."
+                        className="mb-16"
+                    />
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        {blogs.map((post, index) => (
+                            <div
+                                key={index}
+                                className="group bg-white/90 dark:bg-[#111111]/80 backdrop-blur-md rounded-[2rem] p-8 shadow-xl shadow-gray-200/50 dark:shadow-black/40 border border-gray-100 dark:border-white/5 hover:border-sky-500/30 transition-all duration-300 flex flex-col cursor-pointer"
+                            >
+                                <div className="flex items-center justify-between mb-5">
+                                    <span className="text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-widest bg-sky-50 dark:bg-sky-900/20 text-sky-600 dark:text-sky-400">
+                                        {post.category}
+                                    </span>
+                                    <span className="text-xs text-gray-400 dark:text-gray-500 font-medium">
+                                        {post.date}
+                                    </span>
+                                </div>
+
+                                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-3 leading-snug group-hover:text-sky-primary transition-colors duration-200">
+                                    {post.title}
+                                </h3>
+                                <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed mb-6 grow">
+                                    {post.excerpt}
+                                </p>
+
+                                <div className="flex items-center justify-between mt-auto">
+                                    <div className="flex items-center gap-1.5 text-gray-400 dark:text-gray-500 text-xs font-medium">
+                                        <Clock className="w-3.5 h-3.5" />
+                                        <span>{post.readTime}</span>
+                                    </div>
+                                    <div className="flex flex-wrap gap-1.5">
+                                        {post.tags.map((tag, i) => (
+                                            <span key={i} className="text-[11px] px-2 py-0.5 bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-gray-400 rounded-md font-medium">
+                                                {tag}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+            {/* Section Divider */}
+            <div className="w-full h-px bg-linear-to-r from-transparent via-sky-primary/20 to-transparent"></div>
+
+            {/* Testimonials Section */}
+            <section
+                id="testimonials"
+                ref={testimonialsRef}
+                className={`relative py-40 bg-transparent transition-colors duration-300 reveal ${testimonialsIsVisible ? "visible" : ""}`}
+            >
+                <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                    <div className="absolute top-1/3 left-1/4 w-96 h-96 bg-sky-100 dark:bg-sky-900/5 rounded-full blur-3xl opacity-20"></div>
+                </div>
+
+                <div className="relative max-w-7xl mx-auto px-6">
+                    <SectionHeader
+                        label="Testimonials"
+                        title="What People Say"
+                        subtitle="Feedback and reviews from visitors and collaborators."
+                        className="mb-16"
+                    />
+
+                    <TestimonialCarousel testimonials={testimonials} />
+                </div>
+            </section>
+
+            {/* Section Divider */}
+            <div className="w-full h-px bg-linear-to-r from-transparent via-sky-primary/20 to-transparent"></div>
+
+            {/* Visitor Stats + Rating Section */}
+            <section className="py-16">
+                <div className="max-w-2xl mx-auto px-6">
+                    <div className="bg-white/90 dark:bg-[#111111]/80 backdrop-blur-md rounded-3xl border border-gray-100 dark:border-white/5 shadow-xl overflow-hidden">
+                        <div className="flex flex-col sm:flex-row divide-y sm:divide-y-0 sm:divide-x divide-gray-100 dark:divide-white/5">
+
+                            {/* Visitor Count */}
+                            <div className="flex items-center gap-4 px-8 py-6 sm:w-1/2">
+                                <div className="w-11 h-11 rounded-full bg-sky-primary/10 dark:bg-sky-500/20 border border-sky-primary/20 flex items-center justify-center shrink-0">
+                                    <Eye className="w-5 h-5 text-sky-primary" strokeWidth={2} />
+                                </div>
+                                <div>
+                                    <p className="text-2xl font-bold text-gray-900 dark:text-white leading-tight">
+                                        {totalVisits.toLocaleString()}
+                                    </p>
+                                    <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                        Portfolio Visitors
+                                    </p>
+                                </div>
+                            </div>
+
+                            {/* Star Rating */}
+                            <div className="flex flex-col items-center justify-center px-8 py-6 sm:w-1/2 gap-2">
+                                <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                    {hasRated ? "Your rating" : "Rate this portfolio"}
+                                </p>
+                                <div className="flex gap-1.5">
+                                    {[1, 2, 3, 4, 5].map((star) => (
+                                        <button
+                                            key={star}
+                                            onClick={() => handleRate(star)}
+                                            onMouseEnter={() => !hasRated && setHoverStar(star)}
+                                            onMouseLeave={() => setHoverStar(0)}
+                                            disabled={hasRated}
+                                            className="transition-transform hover:scale-125 active:scale-95 disabled:cursor-default"
+                                            style={{ transition: "transform 0.15s cubic-bezier(0.34,1.56,0.64,1)" }}
+                                        >
+                                            <Star
+                                                className={`w-7 h-7 transition-colors duration-150 ${star <= (hoverStar || submittedRating)
+                                                    ? "text-amber-400"
+                                                    : "text-gray-300 dark:text-gray-600"
+                                                    }`}
+                                                strokeWidth={1.5}
+                                                fill={star <= (hoverStar || submittedRating) ? "currentColor" : "none"}
+                                            />
+                                        </button>
+                                    ))}
+                                </div>
+                                <p className="text-[11px] text-gray-400 dark:text-gray-500">
+                                    {hasRated
+                                        ? `Thanks! ${liveAvg > 0 ? `${liveAvg} avg · ${liveTotal} ratings` : ""}`
+                                        : liveTotal > 0
+                                            ? `${liveAvg} avg · ${liveTotal} ${liveTotal === 1 ? "rating" : "ratings"}`
+                                            : "Be the first to rate"}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             {/* Section Divider */}
             <div className="w-full h-px bg-linear-to-r from-transparent via-sky-primary/20 to-transparent"></div>
 

@@ -45,7 +45,7 @@ export default function Layout({ children }) {
             setShowScrollTop(window.scrollY > 300);
 
             // Determine active section for nav highlighting
-            const sections = ["about", "skills", "projects", "contact"];
+            const sections = ["about", "experience", "skills", "projects", "achievements", "testimonials", "blog", "contact"];
             let current = "";
             for (const section of sections) {
                 const el = document.getElementById(section);
@@ -157,8 +157,10 @@ export default function Layout({ children }) {
                         <div className="flex items-center space-x-1">
                             {[
                                 { name: "About", id: "about" },
+                                { name: "Experience", id: "experience" },
                                 { name: "Skills", id: "skills" },
                                 { name: "Projects", id: "projects" },
+                                { name: "Blog", id: "blog" },
                                 { name: "Contact", id: "contact" },
                             ].map((item) => (
                                 <Link
@@ -168,14 +170,16 @@ export default function Layout({ children }) {
                                         scrollToSection(e, item.id);
                                         setActiveLink(item.id);
                                     }}
-                                    className={`relative px-4 py-2 text-sm font-semibold rounded-full transition-all duration-300 group ${
-                                        activeLink === item.id
-                                            ? "text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-500/10"
-                                            : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100/60 dark:hover:bg-white/5"
-                                    }`}
+                                    className={`relative px-4 py-2 text-sm font-semibold rounded-full transition-all duration-300 group ${activeLink === item.id
+                                        ? "text-sky-600 dark:text-sky-400 bg-gradient-to-r from-sky-50 to-sky-100/50 dark:from-sky-500/10 dark:to-sky-500/5"
+                                        : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100/60 dark:hover:bg-white/5"
+                                        }`}
                                 >
                                     {activeLink === item.id && (
-                                        <span className="absolute -top-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-sky-500 dark:bg-sky-400"></span>
+                                        <>
+                                            <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-8 h-0.5 rounded-full bg-gradient-to-r from-transparent via-sky-500 to-transparent dark:via-sky-400"></span>
+                                            <span className="absolute inset-0 rounded-full border border-sky-200/50 dark:border-sky-500/20"></span>
+                                        </>
                                     )}
                                     {item.name}
                                 </Link>
